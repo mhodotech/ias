@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">  <!-- Changed to noupdate="0" for easier testing -->
+        <record id="channel_gp_sync" model="queue.job.channel">
+            <field name="name">gp_sync</field>
+            <field name="parent_id" ref="queue_job.channel_root"/>
+            <field name="removal_interval">30</field>
+        </record>
+    </data>
+</odoo>

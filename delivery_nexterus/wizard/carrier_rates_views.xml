@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="carrier_rates_form_view" model="ir.ui.view">
+        <field name="name">carrier.rates.form</field>
+        <field name="model">carrier.rates</field>
+        <field name="arch" type="xml">
+            <form string="Carrier Rate">
+                <sheet>
+                    <group>
+                        <field name="carrier_scac"/>
+                        <field name="name"/>
+                        <field name="price"/>
+                        <field name="service"/>
+                        <field name="estimated_delivery_date"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="carrier_rates_tree_view" model="ir.ui.view">
+        <field name="name">carrier.rates.list</field>
+        <field name="model">carrier.rates</field>
+        <field name="type">list</field>
+        <field name="arch" type="xml">
+            <list string="Carrier Rates">
+                <field name="choose" widget="boolean_toggle"/>
+                <field name="carrier_scac"/>
+                <field name="name"/>
+                <field name="price" widget="monetary"/>
+                <field name="service"/>
+                <field name="estimated_delivery_date"/>
+            </list>
+        </field>
+    </record>
+    
+</odoo>

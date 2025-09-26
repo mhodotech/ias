@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Create a new main menu item under Job Queue root, next to Queue -->
+    <menuitem id="menu_gp_integration_main"
+              name="GP Integration"
+              parent="queue_job.menu_queue_job_root"
+              sequence="20"/>
+
+    <!-- GP Integration menu items under our main menu -->
+    <menuitem id="menu_gp_sync_wizard"
+              name="Sync from GP"
+              parent="menu_gp_integration_main"
+              action="action_gp_sync_wizard"
+              sequence="10"/>
+
+    <menuitem id="menu_gp_config"
+              name="GP Configuration"
+              parent="menu_gp_integration_main"
+              action="action_gp_config"
+              sequence="20"/>
+
+    <menuitem id="menu_gp_sync_log"
+              name="Sync Logs"
+              parent="menu_gp_integration_main"
+              action="action_gp_sync_log"
+              sequence="30"/>
+
+    <menuitem id="menu_gp_shipment_notification"
+              name="Shipment Notifications"
+              parent="menu_gp_integration_main"
+              action="action_gp_shipment_notification"
+              sequence="40"/>
+</odoo>

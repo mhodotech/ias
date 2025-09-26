@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_delivery_carrier_form_nexterus" model="ir.ui.view">
+    <field name="name">delivery.carrier.form.nexterus</field>
+    <field name="model">delivery.carrier</field>
+    <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet/notebook" position="inside">
+        <page string="Nexterus" invisible="delivery_type != 'nexterus'">
+          <group>
+            <group string="Carrier Information">
+              <field name="nexterus_scac" required="delivery_type == 'nexterus'"/>
+              <field name="nexterus_carrier_id"/>
+              <field name="nexterus_gateway_id"
+                     domain="[('delivery_type', '=', 'nexterus'), ('nexterus_gateway_id', '=', False)]"
+                     invisible="not nexterus_gateway_id"
+                     readonly="1"/>
+            </group>
+
+            <group string="Credentials" invisible="nexterus_gateway_id">
+              <field name="nexterus_username" required="delivery_type == 'nexterus' and not nexterus_gateway_id"/>
+              <field name="nexterus_password" password="1" required="delivery_type == 'nexterus' and not nexterus_gateway_id"/>
+              <button name="action_test_nexterus_connection"
+                      type="object"
+                      string="Test Connection"
+                      class="btn-secondary"
+                      icon="fa-plug"/>
+            </group>
+          </group>
+
+          <group string="Defaults">
+            <field name="nexterus_default_freight_class"/>
+            <field name="nexterus_default_package_type_id"
+                   domain="[('package_carrier_type', '=', 'nexterus')]"/>
+          </group>
+
+          <group string="Accessorial Services">
+            <group>
+              <field name="nexterus_liftgate_origin"/>
+              <field name="nexterus_liftgate_destination"/>
+              <field name="nexterus_inside_delivery"/>
+            </group>
+            <group>
+              <field name="nexterus_notification_required"/>
+              <field name="nexterus_appointment_required"/>
+              <field name="nexterus_call_for_pickup"/>
+            </group>
+          </group>
+        </page>
+      </xpath>
+    </field>
+  </record>
+</odoo>

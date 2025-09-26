@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Close Carrier Wizard Form -->
+  <record id="view_close_carrier_wizard_form" model="ir.ui.view">
+    <field name="name">close.carrier.wizard.form</field>
+    <field name="model">close.carrier.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Close Carriers">
+        <group>
+          <div class="alert alert-info" role="alert">
+            <p>You are about to close the selected delivery orders. This will:</p>
+            <ul>
+              <li>Mark all selected deliveries as Done</li>
+              <li>Send email notifications to configured recipients</li>
+              <li>Log the action in each delivery's chatter</li>
+            </ul>
+          </div>
+        </group>
+
+        <group string="Summary">
+          <field name="carrier_names" readonly="1"/>
+          <field name="delivery_order_names" readonly="1" widget="text"/>
+        </group>
+
+        <group string="Selected Deliveries">
+          <field name="picking_ids" readonly="1" nolabel="1">
+            <list>
+              <field name="name"/>
+              <field name="partner_id"/>
+              <field name="carrier_id"/>
+              <field name="scheduled_date"/>
+              <field name="state"/>
+            </list>
+          </field>
+        </group>
+
+        <group string="Email Recipients">
+          <field name="email_ids" readonly="1" nolabel="1">
+            <list>
+              <field name="email"/>
+              <field name="name"/>
+            </list>
+          </field>
+          <div class="text-muted" invisible="email_ids">
+            <i class="fa fa-info-circle"/> No email recipients configured.
+            Configure them in Inventory > Configuration > Carrier Close Emails
+          </div>
+        </group>
+
+        <footer>
+          <button name="action_close_carriers"
+                  string="Close Carriers"
+                  type="object"
+                  class="btn-primary"
+                  data-hotkey="q"/>
+          <button string="Cancel"
+                  class="btn-secondary"
+                  special="cancel"
+                  data-hotkey="x"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+</odoo>

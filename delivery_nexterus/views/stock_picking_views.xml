@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_stock_picking_form_nexterus" model="ir.ui.view">
+    <field name="name">stock.picking.form.nexterus</field>
+    <field name="model">stock.picking</field>
+    <field name="inherit_id" ref="stock.view_picking_form"/>
+    <field name="arch" type="xml">
+      <!-- Add PRO # to Additional Info section -->
+      <xpath expr="//group[@name='other_infos']" position="inside">
+        <field name="nexterus_pro_number"
+               invisible="not nexterus_pro_number"
+               readonly="1"/>
+      </xpath>
+
+      <!-- Add checkboxes after carrier field in shipping information -->
+      <xpath expr="//field[@name='carrier_id']" position="after">
+        <field name="nexterus_inside_delivery"
+               invisible="not carrier_id or carrier_id.delivery_type != 'nexterus'"/>
+        <field name="nexterus_liftgate_service"
+               invisible="not carrier_id or carrier_id.delivery_type != 'nexterus'"/>
+      </xpath>
+
+      <!-- Add document buttons to button box -->
+      <xpath expr="//div[@name='button_box']" position="inside">
+        <field name="nexterus_bol_url" invisible="1"/>
+        <field name="nexterus_label_url" invisible="1"/>
+        <field name="nexterus_tracking_url" invisible="1"/>
+
+        <button name="action_view_bol"
+                type="object"
+                class="oe_stat_button"
+                icon="fa-file-pdf-o"
+                invisible="not nexterus_bol_url">
+          <div class="o_field_widget o_stat_info">
+            <span class="o_stat_text">BOL</span>
+          </div>
+        </button>
+
+        <button name="action_view_label"
+                type="object"
+                class="oe_stat_button"
+                icon="fa-tag"
+                invisible="not nexterus_label_url">
+          <div class="o_field_widget o_stat_info">
+            <span class="o_stat_text">Label</span>
+          </div>
+        </button>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Search view for Close Carriers -->
+  <record id="view_picking_close_carrier_search" model="ir.ui.view">
+    <field name="name">stock.picking.close.carrier.search</field>
+    <field name="model">stock.picking</field>
+    <field name="arch" type="xml">
+      <search string="Close Carriers">
+        <field name="name" string="Delivery Order"/>
+        <field name="partner_id"/>
+        <field name="carrier_id"/>
+        <filter string="Ready"
+                name="state_ready"
+                domain="[('state', '=', 'assigned')]"/>
+        <filter string="Delivery Orders"
+                name="delivery_orders"
+                domain="[('picking_type_id.code', '=', 'outgoing')]"/>
+        <separator/>
+        <filter string="Today"
+                name="today"
+                domain="[('scheduled_date', '&gt;=', context_today()),
+                        ('scheduled_date', '&lt;', (context_today() + relativedelta(days=1)))]"/>
+        <filter string="This Week"
+                name="week"
+                domain="[('scheduled_date', '&gt;=', (context_today() + relativedelta(weeks=-1, weekday=0))),
+                        ('scheduled_date', '&lt;', (context_today() + relativedelta(weekday=6)))]"/>
+        <group expand="0" string="Group By">
+          <filter string="Carrier"
+                  name="group_by_carrier"
+                  domain="[]"
+                  context="{'group_by': 'carrier_id'}"/>
+          <filter string="Scheduled Date"
+                  name="group_by_scheduled_date"
+                  domain="[]"
+                  context="{'group_by': 'scheduled_date'}"/>
+          <filter string="Partner"
+                  name="group_by_partner"
+                  domain="[]"
+                  context="{'group_by': 'partner_id'}"/>
+        </group>
+      </search>
+    </field>
+  </record>
+</odoo>

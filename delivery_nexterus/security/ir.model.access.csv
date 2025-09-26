@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_carrier_rates_user,carrier.rates.user,model_carrier_rates,base.group_user,1,1,1,1
+access_carrier_close_config,carrier.close.config,model_carrier_close_config,stock.group_stock_manager,1,1,1,1
+access_carrier_close_config_user,carrier.close.config.user,model_carrier_close_config,stock.group_stock_user,1,0,0,0
+access_close_carrier_wizard,close.carrier.wizard,model_close_carrier_wizard,stock.group_stock_user,1,1,1,1

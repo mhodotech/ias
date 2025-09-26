@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_gp_sync_log_form" model="ir.ui.view">
+        <field name="name">gp.sync.log.form</field>
+        <field name="model">gp.sync.log</field>
+        <field name="arch" type="xml">
+            <form string="Sync Log">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="status" widget="badge"/>
+                            <field name="gp_config_id"/>
+                            <field name="create_date"/>
+                        </group>
+                        <group>
+                            <field name="records_processed"/>
+                            <field name="records_created"/>
+                            <field name="records_updated"/>
+                            <field name="records_failed"/>
+                        </group>
+                    </group>
+                    <separator string="Message"/>
+                    <field name="message" readonly="1"/>
+                    <separator string="Error Details"
+                           invisible="not error_details"/>
+                    <field name="error_details" readonly="1"
+                           invisible="not error_details"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_gp_sync_log_list" model="ir.ui.view">
+        <field name="name">gp.sync.log.list</field>
+        <field name="model">gp.sync.log</field>
+        <field name="arch" type="xml">
+            <list string="Sync Logs">
+                <field name="create_date"/>
+                <field name="name"/>
+                <field name="status" widget="badge"
+                       decoration-success="status == 'success'"
+                       decoration-warning="status == 'warning'"
+                       decoration-danger="status == 'error'"/>
+                <field name="records_processed"/>
+                <field name="records_created"/>
+                <field name="records_updated"/>
+                <field name="records_failed"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_gp_sync_log" model="ir.actions.act_window">
+        <field name="name">GP Sync Logs</field>
+        <field name="res_model">gp.sync.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

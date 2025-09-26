@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_choose_delivery_carrier_form_nexterus" model="ir.ui.view">
+    <field name="name">choose.delivery.carrier.form.nexterus</field>
+    <field name="model">choose.delivery.carrier</field>
+    <field name="inherit_id" ref="delivery.choose_delivery_carrier_view_form"/>
+    <field name="arch" type="xml">
+      <!-- Replace the first group -->
+      <xpath expr="//group[1]" position="replace">
+        <group>
+          <group>
+            <field name="carrier_id"
+                   domain="[('delivery_type', '=', 'nexterus'), ('use_for', '=', 'sale')]"
+                   options="{'no_create': True}"/>
+            <field name="delivery_type" invisible="1"/>
+            <field name="currency_id" invisible="1"/>
+            <field name="order_id" invisible="1"/>
+            <field name="gateway_carrier_id" invisible="1"/>
+            <field name="show_rates" invisible="1"/>
+          </group>
+          <group invisible="delivery_type != 'nexterus'">
+            <field name="comment" placeholder="Special instructions..."/>
+            <field name="incoterms_id"/>
+          </group>
+        </group>
+
+        <!-- Package Configuration Section -->
+        <group string="Package Configuration" invisible="delivery_type != 'nexterus'">
+          <group>
+            <field name="package_type_ids"
+                   widget="many2many_tags"
+                   domain="[('package_carrier_type', 'in', ['nexterus', 'none'])]"
+                   options="{'no_create': True}"
+                   required="delivery_type == 'nexterus'"/>
+            <field name="total_packages" required="delivery_type == 'nexterus'"/>
+            <field name="package_weight" required="delivery_type == 'nexterus'"/>
+          </group>
+          <group>
+            <label for="package_length" string="Dimensions (inches)"/>
+            <div class="o_row">
+              <field name="package_length" placeholder="L"/>
+              <span>×</span>
+              <field name="package_width" placeholder="W"/>
+              <span>×</span>
+              <field name="package_height" placeholder="H"/>
+            </div>
+          </group>
+        </group>
+
+        <!-- Carrier Rates Section - Only show after getting rates -->
+        <group string="Available Carriers" invisible="not show_rates or delivery_type != 'nexterus'">
+          <field name="carrier_rates" nolabel="1">
+            <list create="0" edit="0" delete="0">
+              <field name="choose" widget="boolean_toggle"/>
+              <field name="name" string="Carrier"/>
+              <field name="carrier_scac" string="SCAC"/>
+              <field name="carrier_id" column_invisible="1"/>
+              <field name="price" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+              <field name="service" string="Transit Time"/>
+              <field name="currency_id" column_invisible="1"/>
+            </list>
+          </field>
+          <div class="alert alert-info" role="alert" invisible="not carrier_rates">
+            <i class="fa fa-info-circle"/> Select a carrier from the list above.
+            If the carrier doesn't exist in Odoo, it will be created automatically when confirmed.
+          </div>
+        </group>
+      </xpath>
+
+      <!-- Update footer buttons -->
+      <xpath expr="//footer" position="replace">
+        <footer>
+          <!-- Get Rates button - only show before rates -->
+          <button name="get_prices"
+                  class="btn-primary"
+                  type="object"
+                  invisible="show_rates or delivery_type != 'nexterus'"
+                  string="Get Rates"
+                  icon="fa-search"/>
+
+          <!-- Create Shipment button - only show after rates -->
+          <button name="create_nexterus_shipment"
+                  class="btn-primary"
+                  type="object"
+                  invisible="not show_rates or delivery_type != 'nexterus'"
+                  string="Create Shipment"
+                  icon="fa-truck"/>
+
+          <!-- Confirm button for non-Nexterus -->
+          <button name="button_confirm"
+                  string="Confirm"
+                  type="object"
+                  class="btn-primary"
+                  invisible="delivery_type == 'nexterus'"/>
+
+          <!-- Cancel button -->
+          <button string="Cancel"
+                  class="btn-secondary"
+                  special="cancel"/>
+        </footer>
+      </xpath>
+    </field>
+  </record>
+</odoo>

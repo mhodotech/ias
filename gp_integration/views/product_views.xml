@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_form_gp_inherit" model="ir.ui.view">
+        <field name="name">product.template.form.gp</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="GP Info" name="gp_info"
+                      invisible="not gp_itemnmbr">
+                    <group>
+                        <field name="gp_itemnmbr" readonly="1"/>
+                        <field name="gp_itmclscd" readonly="1"/>
+                        <field name="gp_itemdesc" readonly="1"/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record id="view_product_list_gp_inherit" model="ir.ui.view">
+        <field name="name">product.template.list.gp</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="default_code" position="after">
+                <field name="gp_itemnmbr" optional="show"/>
+            </field>
+        </field>
+    </record>
+</odoo>

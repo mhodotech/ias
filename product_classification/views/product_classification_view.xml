@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Product Variant Form View -->
+    <record model="ir.ui.view" id="product_classification_product_form_view">
+        <field name="name">product.classification.product.form</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='inventory']" position="inside">
+                <group name="classification" string="Classification">
+                    <field name="nmfc_code" />
+                    <field name="freight_class" />
+                    <field name="commodity_description" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Product Template Form View -->
+    <record model="ir.ui.view" id="product_classification_template_form_view">
+        <field name="name">product.classification.template.form</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='inventory']" position="inside">
+                <group
+                    name="classification"
+                    string="Classification"
+                    invisible="product_variant_count &gt; 1"
+                >
+                    <field name="nmfc_code" />
+                    <field name="freight_class" />
+                    <field name="commodity_description" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Optional: Add fields to product tree view for quick visibility -->
+    <record model="ir.ui.view" id="product_classification_tree_view">
+        <field name="name">product.classification.tree</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_product_tree_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='standard_price']" position="after">
+                <field name="nmfc_code" optional="hide" />
+                <field name="freight_class" optional="hide" />
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Optional: Add fields to product template tree view -->
+    <record model="ir.ui.view" id="product_template_classification_tree_view">
+        <field name="name">product.template.classification.tree</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='standard_price']" position="after">
+                <field name="nmfc_code" optional="hide" />
+                <field name="freight_class" optional="hide" />
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Optional: Add search filters -->
+    <record model="ir.ui.view" id="product_classification_search_view">
+        <field name="name">product.classification.search</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="nmfc_code" />
+                <field name="freight_class" />
+            </xpath>
+            <xpath expr="//search/filter[last()]" position="after">
+                <separator />
+                <filter string="Has NMFC Code" name="has_nmfc" domain="[('nmfc_code', '!=', False)]" />
+                <filter string="Has Freight Class" name="has_class" domain="[('freight_class', '!=', False)]" />
+            </xpath>
+            <xpath expr="//search/group" position="inside">
+                <filter string="Freight Class" name="group_freight_class" context="{'group_by': 'freight_class'}" />
+            </xpath>
+        </field>
+    </record>
+</odoo>

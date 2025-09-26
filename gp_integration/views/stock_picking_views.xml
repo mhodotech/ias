@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_gp_inherit" model="ir.ui.view">
+        <field name="name">stock.picking.form.gp</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <field name="origin" position="after">
+                <field name="gp_pckslpno" readonly="1"
+                       invisible="not gp_pckslpno"/>
+                <field name="gp_bachnumb" readonly="1"
+                       invisible="not gp_bachnumb"/>
+            </field>
+        </field>
+    </record>
+</odoo>

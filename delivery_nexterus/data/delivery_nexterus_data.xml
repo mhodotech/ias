@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Base Product for Nexterus Carriers - KEEP THIS -->
+        <record id="product_product_delivery_nexterus" model="product.product">
+            <field name="name">Nexterus LTL Freight</field>
+            <field name="default_code">NEXTERUS_BASE</field>
+            <field name="type">service</field>
+            <field name="categ_id" ref="delivery.product_category_deliveries"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0.0</field>
+            <field name="invoice_policy">order</field>
+            <field name="taxes_id" eval="[(5,)]"/>
+        </record>
+
+        <!-- Default Package Types for LTL - OPTIONAL but HELPFUL -->
+        <record id="nexterus_packaging_pallet" model="stock.package.type">
+            <field name="name">Standard Pallet (48x40)</field>
+            <field name="package_carrier_type">nexterus</field>
+            <field name="width">40</field>
+            <field name="packaging_length">48</field>
+            <field name="height">48</field>
+            <field name="max_weight">2000</field>
+        </record>
+
+        <record id="nexterus_packaging_skid" model="stock.package.type">
+            <field name="name">Skid</field>
+            <field name="package_carrier_type">nexterus</field>
+            <field name="width">40</field>
+            <field name="packaging_length">48</field>
+            <field name="height">48</field>
+            <field name="max_weight">2000</field>
+        </record>
+
+        <record id="nexterus_packaging_crate" model="stock.package.type">
+            <field name="name">Crate</field>
+            <field name="package_carrier_type">nexterus</field>
+            <field name="width">48</field>
+            <field name="packaging_length">48</field>
+            <field name="height">48</field>
+            <field name="max_weight">1500</field>
+        </record>
+
+        <!-- Gateway Nexterus Carrier - RECOMMENDED -->
+        <!-- This is the main gateway that users select to get rates -->
+        <record id="delivery_carrier_nexterus_gateway" model="delivery.carrier">
+            <field name="name">Nexterus Gateway</field>
+            <field name="product_id" ref="product_product_delivery_nexterus"/>
+            <field name="delivery_type">nexterus</field>
+            <field name="integration_level">rate_and_ship</field>
+            <field name="nexterus_username"></field>  <!-- To be configured -->
+            <field name="nexterus_password"></field>  <!-- To be configured -->
+            <field name="nexterus_default_freight_class">85</field>
+            <field name="nexterus_default_package_type_id" ref="nexterus_packaging_pallet"/>
+            <field name="use_for">sale</field>
+            <field name="nexterus_scac">GATEWAY</field>  <!-- Dummy SCAC for gateway -->
+            <field name="active" eval="False"/>  <!-- Inactive until configured -->
+        </record>
+
+    </data>
+</odoo>

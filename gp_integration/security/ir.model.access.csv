@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_gp_config_user,gp.config user,model_gp_config,base.group_user,1,0,0,0
+access_gp_config_manager,gp.config manager,model_gp_config,base.group_system,1,1,1,1
+access_gp_sync_log_user,gp.sync.log user,model_gp_sync_log,base.group_user,1,0,0,0
+access_gp_sync_log_manager,gp.sync.log manager,model_gp_sync_log,base.group_system,1,1,1,1
+access_gp_sync_service_user,gp.sync.service user,model_gp_sync_service,base.group_user,1,0,0,0
+access_gp_sync_service_manager,gp.sync.service manager,model_gp_sync_service,base.group_system,1,1,1,1
+access_gp_sync_wizard,access_gp_sync_wizard,model_gp_sync_wizard,base.group_user,1,1,1,1
+access_gp_shipment_notification_user,gp.shipment.notification.user,model_gp_shipment_notification,gp_integration_group_user,1,0,0,0
+access_gp_shipment_notification_manager,gp.shipment.notification.manager,model_gp_shipment_notification,gp_integration_group_manager,1,1,1,1

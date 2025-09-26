@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_gp_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.gp</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="GP Integration" name="gp_integration">
+                    <group>
+                        <group string="GP References">
+                            <field name="gp_sopnumbe" readonly="1"/>
+                            <field name="gp_custnmbr" readonly="1"/>
+                            <field name="gp_cstponbr" readonly="1"/>
+                            <field name="gp_pckslpno" readonly="1"/>
+                            <field name="gp_bachnumb" readonly="1"/>
+                        </group>
+                        <group string="GP Sales Info">
+                            <field name="gp_slprsnid" readonly="1"/>
+                            <field name="gp_salesperson_name" readonly="1"/>
+                            <field name="gp_salsterr" readonly="1"/>
+                            <field name="gp_shipmthd" readonly="1"/>
+                        </group>
+                        <group string="GP Dates">
+                            <field name="gp_docdate" readonly="1"/>
+                            <field name="gp_reqshipdate" readonly="1"/>
+                            <field name="gp_fufildat" readonly="1"/>
+                            <field name="gp_actlship" readonly="1"/>
+                        </group>
+                        <group string="Sync Info">
+                            <field name="gp_sync_status" readonly="1"/>
+                            <field name="gp_last_sync" readonly="1"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record id="view_order_list_gp_inherit" model="ir.ui.view">
+        <field name="name">sale.order.list.gp</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="gp_sopnumbe" optional="show"/>
+                <field name="gp_pckslpno" optional="hide"/>
+                <field name="gp_sync_status" optional="show" widget="badge"
+                       decoration-success="gp_sync_status == 'synced'"
+                       decoration-warning="gp_sync_status == 'pending'"
+                       decoration-danger="gp_sync_status == 'error'"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_sales_order_filter_gp" model="ir.ui.view">
+        <field name="name">sale.order.search.gp</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_view_search_inherit_sale"/>
+        <field name="arch" type="xml">
+            <search position="inside">
+                <field name="gp_sopnumbe"/>
+                <field name="gp_custnmbr"/>
+                <field name="gp_pckslpno"/>
+                <separator/>
+                <filter string="GP Synced" name="gp_synced"
+                        domain="[('gp_sync_status', '=', 'synced')]"/>
+                <filter string="GP Pending" name="gp_pending"
+                        domain="[('gp_sync_status', '=', 'pending')]"/>
+                <filter string="GP Error" name="gp_error"
+                        domain="[('gp_sync_status', '=', 'error')]"/>
+            </search>
+        </field>
+    </record>
+</odoo>

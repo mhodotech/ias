@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Base Product for Shipments -->
+        <record id="product_product_span_shipment" model="product.product">
+            <field name="name">Span Shipment Service</field>
+            <field name="default_code">SPAN_SHIP</field>
+            <field name="type">service</field>
+            <field name="categ_id" ref="delivery.product_category_deliveries"/>
+            <field name="sale_ok" eval="False"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0.0</field>
+            <field name="invoice_policy">order</field>
+            <field name="taxes_id" eval="[(5,)]"/>
+        </record>
+
+        <!-- Default Package Types -->
+        <record id="package_type_pallet" model="stock.package.type">
+            <field name="name">Standard Pallet</field>
+            <field name="packaging_length">48</field>
+            <field name="width">40</field>
+            <field name="height">48</field>
+            <field name="max_weight">50</field>
+        </record>
+
+        <record id="package_type_skid" model="stock.package.type">
+            <field name="name">Skid</field>
+            <field name="packaging_length">48</field>
+            <field name="width">40</field>
+            <field name="height">48</field>
+            <field name="max_weight">45</field>
+        </record>
+
+        <record id="package_type_crate" model="stock.package.type">
+            <field name="name">Crate</field>
+            <field name="packaging_length">48</field>
+            <field name="width">48</field>
+            <field name="height">48</field>
+            <field name="max_weight">40</field>
+        </record>
+
+        <!-- Default Span Package Types -->
+        <record id="span_package_type_pkg" model="span.package.type">
+            <field name="name">Package</field>
+            <field name="code">PACKAGE</field>
+        </record>
+
+        <record id="span_package_type_case" model="span.package.type">
+            <field name="name">Case</field>
+            <field name="code">CASES</field>
+        </record>
+
+        <record id="span_package_type_box" model="span.package.type">
+            <field name="name">Box</field>
+            <field name="code">BOX</field>
+        </record>
+
+        <!-- Default Commodity Descriptions -->
+        <record id="commodity_general_freight" model="commodity.description">
+            <field name="name">General Freight - Mixed Commodities</field>
+        </record>
+
+        <record id="commodity_medical_equipment" model="commodity.description">
+            <field name="name">Medical Equipment and Supplies</field>
+        </record>
+
+        <record id="commodity_mattress" model="commodity.description">
+            <field name="name">Mattresses and Bedding Products</field>
+        </record>
+
+        <!-- Default Nexterus Carrier -->
+        <record id="delivery_carrier_nexterus" model="delivery.carrier">
+            <field name="name">Nexterus LTL</field>
+            <field name="product_id" ref="product_product_span_shipment"/>
+            <field name="delivery_type">nexterus</field>
+            <field name="integration_level">rate_and_ship</field>
+            <field name="nexterus_default_freight_class">85</field>
+            <field name="active" eval="False"/>
+        </record>
+
+        <record id="ir_cron_check_expired_rates" model="ir.cron">
+            <field name="name">Span Shipment: Check Expired Rates</field>
+            <field name="model_id" ref="model_shipment_rate"/>
+            <field name="state">code</field>
+            <field name="code">model.check_expired_rates()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

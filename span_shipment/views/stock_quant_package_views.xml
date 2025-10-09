@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_stock_quant_package_form_span_shipment" model="ir.ui.view">
+        <field name="name">stock.quant.package.form.span.shipment</field>
+        <field name="model">stock.quant.package</field>
+        <field name="inherit_id" ref="stock.view_quant_package_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="after">
+                <group string="Shipping Information">
+                    <group>
+                        <field name="shipping_weight"/>
+                        <label for="shipping_length" string="Dimensions (inches)"/>
+                        <div class="o_row">
+                            <field name="shipping_length" placeholder="L"/>
+                            <span>×</span>
+                            <field name="shipping_width" placeholder="W"/>
+                            <span>×</span>
+                            <field name="shipping_height" placeholder="H"/>
+                        </div>
+                        <field name="pcf" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="nmfc_class" required="1"/>
+                        <field name="nmfc_code"/>
+                        <field name="commodity_description_id"/>
+                        <field name="is_shipped" readonly="1"/>
+                    </group>
+                </group>
+                <group string="Span Package Details">
+                    <field name="span_package_type_id"/>
+                    <field name="span_package_qty"/>
+                </group>
+                <group string="Special Handling">
+                    <field name="is_hazmat"/>
+                    <field name="special_handling"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

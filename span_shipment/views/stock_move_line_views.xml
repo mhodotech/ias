@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_line_tree_span_shipment" model="ir.ui.view">
+        <field name="name">stock.move.line.tree.span.shipment</field>
+        <field name="model">stock.move.line</field>
+        <field name="inherit_id" ref="stock_picking_batch.view_move_line_tree"/>
+        <field name="arch" type="xml">
+            <!-- Add picked field after quantity -->
+            <xpath expr="//field[@name='quantity']" position="after">
+                <field name="picked" widget="boolean_toggle" readonly="0"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

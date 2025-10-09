@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_commodity_description_list" model="ir.ui.view">
+        <field name="name">commodity.description.list</field>
+        <field name="model">commodity.description</field>
+        <field name="arch" type="xml">
+            <list string="Commodity Descriptions" editable="bottom">
+                <field name="name"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_commodity_description_form" model="ir.ui.view">
+        <field name="name">commodity.description.form</field>
+        <field name="model">commodity.description</field>
+        <field name="arch" type="xml">
+            <form string="Commodity Description">
+                <sheet>
+                    <group>
+                        <field name="name" required="1"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

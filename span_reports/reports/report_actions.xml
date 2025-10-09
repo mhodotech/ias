@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Report Action -->
+        <record id="action_report_container_shipping_label" model="ir.actions.report">
+            <field name="name">Shipping Label</field>
+            <field name="model">stock.picking</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">span_reports.report_container_shipping_label</field>
+            <field name="report_file">span_reports.report_container_shipping_label</field>
+            <field name="print_report_name">'Shipping Label - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="stock.model_stock_picking"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="base.paperformat_us"/>
+        </record>
+
+        <!-- Paper Format for Label (optional - customize size) -->
+        <record id="paperformat_shipping_label" model="report.paperformat">
+            <field name="name">Shipping Label Format</field>
+            <field name="default" eval="False"/>
+            <field name="format">Letter</field>
+            <field name="page_height">0</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">10</field>
+            <field name="margin_bottom">10</field>
+            <field name="margin_left">10</field>
+            <field name="margin_right">10</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">0</field>
+            <field name="dpi">96</field>
+        </record>
+
+        <!-- Update report to use custom paper format -->
+        <record id="action_report_container_shipping_label" model="ir.actions.report">
+            <field name="paperformat_id" ref="paperformat_shipping_label"/>
+        </record>
+
+    </data>
+</odoo>

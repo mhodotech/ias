@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_span_package_type_list" model="ir.ui.view">
+        <field name="name">span.package.type.list</field>
+        <field name="model">span.package.type</field>
+        <field name="arch" type="xml">
+            <list string="Span Package Types" editable="bottom">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="active"/>
+                <field name="notes"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_span_package_type_form" model="ir.ui.view">
+        <field name="name">span.package.type.form</field>
+        <field name="model">span.package.type</field>
+        <field name="arch" type="xml">
+            <form string="Span Package Type">
+                <sheet>
+                    <group>
+                        <field name="name" required="1"/>
+                        <field name="code" required="1"/>
+                        <field name="active"/>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

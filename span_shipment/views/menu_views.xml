@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Actions -->
+    <record id="action_span_package_type" model="ir.actions.act_window">
+        <field name="name">Span Package Types</field>
+        <field name="res_model">span.package.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_commodity_description" model="ir.actions.act_window">
+        <field name="name">Commodity Descriptions</field>
+        <field name="res_model">commodity.description</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_carrier_close_config" model="ir.actions.act_window">
+        <field name="name">Carrier Close Emails</field>
+        <field name="res_model">carrier.close.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_shipment_rates" model="ir.actions.act_window">
+        <field name="name">Shipment Rates</field>
+        <field name="res_model">shipment.rate</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_close_carriers" model="ir.actions.act_window">
+        <field name="name">Close Carriers</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[
+            ('picking_type_id.code', '=', 'outgoing'),
+            ('state', '=', 'assigned'),
+            ('carrier_id', '!=', False),
+        ]</field>
+        <field name="context">{'search_default_group_by_carrier': 1}</field>
+    </record>
+
+    <!-- Server action for Close Carriers -->
+    <record id="action_server_close_carriers" model="ir.actions.server">
+        <field name="name">Close Carriers</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    wizard = env['close.carrier.wizard'].create({
+        'picking_ids': [(6, 0, records.ids)]
+    })
+    action = {
+        'name': 'Close Carriers',
+        'type': 'ir.actions.act_window',
+        'res_model': 'close.carrier.wizard',
+        'res_id': wizard.id,
+        'view_mode': 'form',
+        'target': 'new',
+    }
+        </field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_span_shipment_config"
+              name="Span Shipment"
+              parent="stock.menu_warehouse_config"
+              sequence="90"/>
+
+    <menuitem id="menu_span_package_type"
+              name="Span Package Types"
+              parent="menu_span_shipment_config"
+              action="action_span_package_type"
+              sequence="10"/>
+
+    <menuitem id="menu_commodity_description"
+              name="NMFC Descriptions"
+              parent="menu_span_shipment_config"
+              action="action_commodity_description"
+              sequence="20"/>
+
+    <menuitem id="menu_carrier_close_config"
+              name="Carrier Close Emails"
+              parent="menu_span_shipment_config"
+              action="action_carrier_close_config"
+              sequence="30"/>
+
+    <menuitem id="menu_shipment_rates"
+              name="Shipment Rates"
+              parent="stock.menu_stock_warehouse_mgmt"
+              action="action_shipment_rates"
+              sequence="45"/>
+
+    <menuitem id="menu_close_carriers"
+              name="Close Carriers"
+              parent="stock.menu_stock_warehouse_mgmt"
+              action="action_close_carriers"
+              sequence="50"/>
+
+</odoo>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_container_shipping_label_document">
+            <t t-call="web.basic_layout">
+                <t t-set="container_data" t-value="o.get_container_report_data()"/>
+                <div class="page container-shipping-label">
+                    <style>
+                        .container-shipping-label {
+                            font-family: Arial, sans-serif;
+                            font-size: 12px;
+                            padding: 20px;
+                        }
+                        .container-header {
+                            text-align: center;
+                            font-size: 18px;
+                            font-weight: bold;
+                            margin-bottom: 20px;
+                            border: 2px solid black;
+                            padding: 10px;
+                            background-color: #f0f0f0;
+                        }
+                        .container-info-section {
+                            border: 2px solid black;
+                            margin-bottom: 15px;
+                            padding: 10px;
+                        }
+                        .info-row {
+                            display: flex;
+                            margin-bottom: 8px;
+                        }
+                        .info-label {
+                            font-weight: bold;
+                            min-width: 120px;
+                            margin-right: 10px;
+                        }
+                        .info-value {
+                            flex: 1;
+                        }
+                        .ship-to-section {
+                            border: 2px solid black;
+                            margin-bottom: 15px;
+                            padding: 10px;
+                            min-height: 100px;
+                        }
+                        .ship-to-header {
+                            font-weight: bold;
+                            text-decoration: underline;
+                            margin-bottom: 10px;
+                        }
+                        .carrier-section {
+                            border: 2px solid black;
+                            margin-bottom: 15px;
+                            padding: 10px;
+                        }
+                        .barcode-container {
+                            text-align: center;
+                            margin: 15px 0;
+                        }
+                        .items-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border: 2px solid black;
+                        }
+                        .items-table th {
+                            background-color: #e0e0e0;
+                            border: 1px solid black;
+                            padding: 8px;
+                            text-align: left;
+                            font-weight: bold;
+                        }
+                        .items-table td {
+                            border: 1px solid black;
+                            padding: 8px;
+                        }
+                        .container-footer {
+                            margin-top: 20px;
+                            text-align: center;
+                            font-weight: bold;
+                            font-size: 14px;
+                        }
+                    </style>
+
+                    <!-- Header -->
+                    <div class="container-header">
+                        Container Contents
+                    </div>
+
+                    <!-- Shipment Info Section -->
+                    <div class="container-info-section">
+                        <div class="info-row">
+                            <span class="info-label">Shipment#:</span>
+                            <span class="info-value"><t t-esc="container_data['shipment_number']"/></span>
+                            <span class="info-label" style="margin-left: 30px;">Order #:</span>
+                            <span class="info-value"><t t-esc="container_data['order_number']"/></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Date:</span>
+                            <span class="info-value"><t t-esc="container_data['date'].strftime('%m/%d/%Y') if container_data['date'] else ''"/></span>
+                            <span class="info-label" style="margin-left: 30px;">PO #:</span>
+                            <span class="info-value"><t t-esc="container_data['po_number']"/></span>
+                        </div>
+                    </div>
+
+                    <!-- Ship To Section -->
+                    <div class="ship-to-section">
+                        <div class="ship-to-header">SHIP TO:</div>
+                        <div>
+                            <t t-foreach="container_data['ship_to']" t-as="address_line">
+                                <div><t t-esc="address_line"/></div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Carrier Section -->
+                    <div class="carrier-section">
+                        <div class="info-row">
+                            <span class="info-label">Carrier:</span>
+                            <span class="info-value"><t t-esc="container_data['carrier']"/></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">PRO Number:</span>
+                            <span class="info-value"><t t-esc="container_data['pro_number']"/></span>
+                        </div>
+                        <t t-if="container_data['pro_barcode']">
+                            <div class="barcode-container">
+                                <img t-att-src="'data:image/png;base64,%s' % container_data['pro_barcode']"
+                                     style="height: 50px; max-width: 300px;"/>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Items Table -->
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">Qty</th>
+                                <th style="width: 120px;">Item #</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="container_data['items']" t-as="item">
+                                <tr>
+                                    <td style="text-align: center;"><t t-esc="item['qty']"/></td>
+                                    <td><t t-esc="item['item_code']"/></td>
+                                    <td><t t-esc="item['description']"/></td>
+                                </tr>
+                            </t>
+                            <t t-if="not container_data['items']">
+                                <tr>
+                                    <td colspan="3" style="text-align: center; padding: 20px;">
+                                        No items to display
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <!-- Container Footer -->
+                    <div class="container-footer">
+                        Container <t t-esc="container_data['container_number']"/> of <t t-esc="container_data['total_containers']"/>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <!-- Main report template -->
+        <template id="report_container_shipping_label">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="span_reports.report_container_shipping_label_document"/>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

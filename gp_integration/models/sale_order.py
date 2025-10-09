@@ -77,7 +77,7 @@ class SaleOrder(models.Model):
 
     @api.model
     def create_from_gp(self, gp_data, line_data):
-        """Create or update sale order from GP data"""
+        """Create sale order from GP data - only creates SO and Pick operation"""
         # Check if order already exists
         existing_order = self.search([('gp_sopnumbe', '=', gp_data['SOPNUMBE'])], limit=1)
 
@@ -116,13 +116,12 @@ class SaleOrder(models.Model):
         for line in line_data:
             self._create_order_line(order, line)
 
-        # Auto-confirm if has picking ticket
+        # Confirm order to create Pick operation (and Pack, Ship)
         if gp_data.get('PCKSLPNO'):
             order.action_confirm()
 
-            # Process picking if needed
-            if gp_data.get('has_fulfillment'):
-                order.process_gp_picking(gp_data, line_data)
+            # Configure the Pick operation with GP data
+            order._configure_pick_operation(gp_data, line_data)
 
         return order
 
@@ -167,83 +166,69 @@ class SaleOrder(models.Model):
             if not existing_line:
                 self._create_order_line(order, line_data_item)
 
-        # Process picking if needed and not already done
+        # Confirm order if needed
         if gp_data.get('PCKSLPNO') and order.state == 'draft':
             order.action_confirm()
 
-        # Update packing transfer name if it exists
-        gp_pckslpno = gp_data.get('PCKSLPNO', '').strip()
-        if gp_pckslpno:
-            # Find any packing transfers that don't have the right name
-            packing = order.picking_ids.filtered(
-                lambda p: p.picking_type_id.code == 'internal' and
-                          'Pack' in (p.picking_type_id.name or '') and
-                          p.name != gp_pckslpno
-            )
-
-            if packing:
-                packing = packing[0] if len(packing) > 1 else packing
-                packing.write({
-                    'name': gp_pckslpno,
-                    'gp_pckslpno': gp_pckslpno,
-                    'gp_bachnumb': gp_data.get('BACHNUMB', ''),
-                })
-                _logger.info(f'Updated packing transfer name to {gp_pckslpno}')
-
-        # Check if pickings exist, create if missing
-        if order.state in ['sale', 'done']:
-            picking = order.picking_ids.filtered(
-                lambda p: p.picking_type_id.code == 'internal' and
-                          'Pick' in (p.picking_type_id.name or '')
-            )
-
-            if not picking:
-                # Pickings were deleted, recreate them
-                _logger.warning(f'Pickings missing for order {order.name}, recreating...')
-                order.action_confirm()
-                # Force recreation of deliveries
-                order._create_delivery()
-
-                picking = order.picking_ids.filtered(
-                    lambda p: p.picking_type_id.code == 'internal' and
-                              'Pick' in (p.picking_type_id.name or '')
-                )
-
-            # Process fulfillment if GP has fulfillment
-            if gp_data.get('has_fulfillment'):
-                picking = order.picking_ids.filtered(
-                    lambda p: p.picking_type_id.code == 'internal' and
-                              'Pick' in (p.picking_type_id.name or '')
-                )
-
-                if picking:
-                    # Check if picking is not already done
-                    picking_to_process = picking.filtered(lambda p: p.state != 'done')
-
-                    if picking_to_process:
-                        # Process the picking (validate it)
-                        for pick in picking_to_process:
-                            self._process_single_picking(pick, gp_data, line_data)
-
-                    # After picking is done, handle packing transfer
-                    self._update_packing_transfer(order, gp_data)
+        # Configure or update Pick operation
+        if order.state in ['sale', 'done'] and gp_data.get('PCKSLPNO'):
+            order._configure_pick_operation(gp_data, line_data)
 
         return order
 
-    def _process_single_picking(self, picking, gp_data, line_data):
-        """Process a single picking - extracted for reuse"""
-        # Update picking with GP data
-        picking.write({
-            'gp_pckslpno': gp_data.get('PCKSLPNO', ''),
-            'gp_bachnumb': gp_data.get('BACHNUMB', ''),
-            'scheduled_date': gp_data.get('FUFILDAT') or fields.Datetime.now(),
-        })
+    def _configure_pick_operation(self, gp_data, line_data):
+        """Configure ONLY the Pick operation with GP data"""
+        self.ensure_one()
 
-        # Ensure reservations exist
+        gp_pckslpno = gp_data.get('PCKSLPNO', '').strip()
+        if not gp_pckslpno:
+            return
+
+        # Find the Pick operation (internal transfer from Stock to Packing)
+        # In 3-step: WH/Stock → WH/Packing → WH/Output → Customer
+        pick_operation = self.picking_ids.filtered(
+            lambda p: p.picking_type_id.code == 'internal' and
+                      p.state not in ['done', 'cancel'] and
+                      'Pick' in (p.picking_type_id.name or '')
+        )
+
+        if not pick_operation:
+            _logger.warning(f'No Pick operation found for order {self.name}')
+            return
+
+        # Should be only one Pick operation
+        if len(pick_operation) > 1:
+            _logger.warning(f'Multiple Pick operations found for order {self.name}, using first one')
+            pick_operation = pick_operation[0]
+
+        # Update Pick operation with GP data
+        pick_vals = {
+            'name': gp_pckslpno,  # Set Pick operation name to GP picking ticket number
+            'gp_pckslpno': gp_pckslpno,
+            'gp_bachnumb': gp_data.get('BACHNUMB', ''),
+            'scheduled_date': gp_data.get('FUFILDAT') or gp_data.get('ReqShipDate') or fields.Datetime.now(),
+        }
+
+        pick_operation.write(pick_vals)
+
+        # Always just reserve quantities (set to Ready state)
+        # User will validate after physical picking is done
+        if pick_operation.state in ['confirmed', 'waiting']:
+            pick_operation.action_assign()
+
+        # Store GP fulfillment info on moves for reference
+        if gp_data.get('has_fulfillment'):
+            self._update_pick_quantities(pick_operation, line_data)
+
+        _logger.info(f'Configured Pick operation {pick_operation.name} for order {self.name}')
+
+    def _process_pick_fulfillment(self, picking, gp_data, line_data):
+        """Process Pick operation fulfillment based on GP data"""
+        # Ensure picking is in correct state
         if picking.state in ['confirmed', 'waiting']:
             picking.action_assign()
 
-        # Process move lines based on GP fulfilled quantities
+        # Update move quantities based on GP fulfilled quantities
         for line in line_data:
             qty_fulfilled = line.get('QTYFULFI', 0)
             if qty_fulfilled > 0:
@@ -282,45 +267,23 @@ class SaleOrder(models.Model):
                                 'company_id': move.company_id.id,
                             })
 
-        # Validate the picking
-        if picking.state in ['assigned', 'confirmed', 'waiting']:
+        # Validate the Pick operation if quantities are set
+        # This will automatically create the Pack operation
+        if picking.state == 'assigned':
             try:
-                if picking.state != 'assigned':
-                    picking.action_assign()
-
                 picking.button_validate()
-                _logger.info(f'Validated picking {picking.name}')
-
+                _logger.info(f'Validated Pick operation {picking.name} - Pack operation created automatically')
             except Exception as e:
-                _logger.error('Error validating picking %s: %s', picking.name, e)
+                _logger.error(f'Error validating Pick operation {picking.name}: {str(e)}')
+                # Try with immediate transfer wizard
                 try:
-                    if 'stock.immediate.transfer' in self.env:
-                        wiz = self.env['stock.immediate.transfer'].create({
-                            'pick_ids': [(4, picking.id)]
-                        })
-                        wiz.process()
-                except:
-                    _logger.error(f'Could not validate picking {picking.name}')
-
-    def _update_packing_transfer(self, order, gp_data):
-        """Update or create packing transfer with GP name"""
-        gp_pckslpno = gp_data.get('PCKSLPNO', '').strip()
-
-        if gp_pckslpno:
-            # Find packing transfer
-            packing = order.picking_ids.filtered(
-                lambda p: p.picking_type_id.code == 'internal' and
-                          'Pack' in (p.picking_type_id.name or '')
-            )
-
-            if packing:
-                packing = packing[0] if len(packing) > 1 else packing
-                packing.write({
-                    'name': gp_pckslpno,
-                    'gp_pckslpno': gp_pckslpno,
-                    'gp_bachnumb': gp_data.get('BACHNUMB', ''),
-                })
-                _logger.info(f'Updated packing transfer name to {gp_pckslpno}')
+                    wiz = self.env['stock.immediate.transfer'].create({
+                        'pick_ids': [(4, picking.id)]
+                    })
+                    wiz.process()
+                    _logger.info(f'Validated Pick operation {picking.name} with wizard')
+                except Exception as e2:
+                    _logger.error(f'Could not validate Pick operation {picking.name}: {str(e2)}')
 
     def _create_order_line(self, order, line_data):
         """Create order line from GP line data"""
@@ -336,31 +299,3 @@ class SaleOrder(models.Model):
         }
 
         return self.env['sale.order.line'].create(vals)
-
-    # Updated process_gp_picking method for sale_order.py
-    # This replaces the existing process_gp_picking method in the SaleOrder class
-
-    def process_gp_picking(self, gp_data, line_data):
-        """Process picking order from GP data - Odoo 18 compatible"""
-        self.ensure_one()
-
-        # Get the picking order (first step in 3-step delivery)
-        picking = self.picking_ids.filtered(
-            lambda p: p.picking_type_id.code == 'internal' and
-                      p.location_dest_id.usage == 'internal' and
-                      'Pick' in (p.picking_type_id.name or '')
-        )
-
-        if not picking:
-            _logger.warning(f'No picking order found for {self.name}')
-            return
-
-        picking = picking[0] if len(picking) > 1 else picking
-
-        # Use the extracted method
-        self._process_single_picking(picking, gp_data, line_data)
-
-        # Handle packing transfer naming
-        self._update_packing_transfer(self, gp_data)
-
-        _logger.info(f'Processed GP picking for order {self.name}')

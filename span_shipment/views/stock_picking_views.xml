@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_stock_picking_form_span_shipment" model="ir.ui.view">
+        <field name="name">stock.picking.form.span.shipment</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <!-- Add buttons to header using a safer position -->
+            <xpath expr="//header/field[@name='state']" position="before">
+                <button name="action_put_in_pack"
+                        string="Put in Pack"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state in ['done', 'cancel']"/>
+                <button name="action_get_rates"
+                        string="Get Rates"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state in ['done', 'cancel']"/>
+            </xpath>
+
+            <!-- Add smart button -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_shipment_rates"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-dollar"
+                        invisible="shipment_rate_count == 0">
+                    <field name="shipment_rate_count" widget="statinfo" string="Rates"/>
+                </button>
+            </xpath>
+
+            <!-- Add special services section before notebook -->
+            <xpath expr="//sheet/notebook" position="before">
+                <group string="Special Services" col="4">
+                    <field name="requires_liftgate"/>
+                    <field name="requires_inside_delivery"/>
+                    <field name="shipping_notes" colspan="4"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

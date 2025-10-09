@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_get_rates_wizard_form" model="ir.ui.view">
+        <field name="name">get.rates.wizard.form</field>
+        <field name="model">get.rates.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Get Shipping Rates">
+                <group invisible="not show_create_shipment">
+                    <div class="alert alert-info" role="alert">
+                        Ready to create shipment with selected rate.
+                    </div>
+                </group>
+                <group invisible="show_create_shipment">
+                    <group string="Carrier Selection">
+                        <field name="carrier_type" widget="radio"/>
+                        <field name="delivery_carrier_id" required="1"/>
+                    </group>
+                    <group string="Special Services">
+                        <field name="requires_liftgate"/>
+                        <field name="requires_inside_delivery"/>
+                        <field name="shipping_notes"/>
+                    </group>
+                </group>
+                <group string="Packages" invisible="show_create_shipment">
+                    <field name="package_ids" nolabel="1" readonly="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="shipping_weight"/>
+                            <field name="shipping_length" string="L" optional="hide"/>
+                            <field name="shipping_width" string="W" optional="hide"/>
+                            <field name="shipping_height" string="H" optional="hide"/>
+                            <field name="nmfc_class"/>
+                            <field name="commodity_description_id"/>
+                        </list>
+                    </field>
+                </group>
+                <group string="Available Rates" invisible="not show_rates or show_create_shipment">
+                    <field name="rate_line_ids" nolabel="1">
+                        <list create="0" edit="0" delete="0">
+                            <field name="is_selected" widget="boolean_toggle"/>
+                            <field name="carrier_name"/>
+                            <field name="carrier_scac"/>
+                            <field name="rate" widget="monetary"/>
+                            <field name="transit_days"/>
+                        </list>
+                    </field>
+                </group>
+                <footer>
+                    <button name="action_get_rates"
+                            string="Get Rates"
+                            type="object"
+                            class="btn-primary"
+                            invisible="show_rates or show_create_shipment"/>
+                    <button name="action_save_rates"
+                            string="Save Rate"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="not show_rates or show_create_shipment"/>
+                    <button name="action_create_shipment"
+                            string="Create Shipment"
+                            type="object"
+                            class="btn-primary"
+                            invisible="not show_rates and not show_create_shipment"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

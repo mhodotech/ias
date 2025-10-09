@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_stock_picking_batch_form_span_shipment" model="ir.ui.view">
+        <field name="name">stock.picking.batch.form.span.shipment</field>
+        <field name="model">stock.picking.batch</field>
+        <field name="inherit_id" ref="stock_picking_batch.stock_picking_batch_form"/>
+        <field name="arch" type="xml">
+            <!-- Add buttons to header -->
+            <xpath expr="//header/button[@name='action_done']" position="after">
+                <button name="action_put_in_pack"
+                        string="Put in Pack"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state in ['done', 'cancel']"/>
+                <button name="action_get_rates"
+                        string="Get Rates"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state in ['done', 'cancel']"/>
+            </xpath>
+
+            <!-- Add smart button -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_shipment_rates"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-dollar"
+                        invisible="shipment_rate_count == 0">
+                    <field name="shipment_rate_count" widget="statinfo" string="Rates"/>
+                </button>
+            </xpath>
+
+            <xpath expr="//button[@name='action_view_shipment_rates']" position="after">
+                <button name="action_view_packages"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-cube"
+                        invisible="package_count == 0">
+                    <field name="package_count" widget="statinfo" string="Packages"/>
+                </button>
+            </xpath>
+
+            <!-- Add special services section before notebook -->
+            <xpath expr="//notebook" position="before">
+                <group string="Special Services" col="4">
+                    <field name="requires_liftgate"/>
+                    <field name="requires_inside_delivery"/>
+                    <field name="shipping_notes" colspan="4"/>
+                </group>
+            </xpath>
+
+            <!-- Add Additional Info tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Shipment Data">
+                    <group>
+                        <group>
+                            <field name="carrier_id"/>
+                            <field name="carrier_tracking_ref"/>
+                        </group>
+                        <group>
+                            <field name="total_shipping_weight"/>
+                            <field name="related_sale_orders"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

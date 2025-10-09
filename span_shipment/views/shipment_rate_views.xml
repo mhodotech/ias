@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_shipment_rate_list" model="ir.ui.view">
+        <field name="name">shipment.rate.list</field>
+        <field name="model">shipment.rate</field>
+        <field name="arch" type="xml">
+            <list string="Shipment Rates">
+                <field name="create_date"/>
+                <field name="carrier_name"/>
+                <field name="carrier_scac"/>
+                <field name="rate" widget="monetary"/>
+                <field name="transit_days"/>
+                <field name="state" widget="badge" decoration-success="state == 'active'" decoration-warning="state == 'expired'" decoration-info="state == 'used'"/>
+                <field name="pro_number"/>
+                <button name="action_create_shipment"
+                        string="Create Shipment"
+                        type="object"
+                        class="btn-sm btn-primary"
+                        invisible="state != 'active'"/>
+                <button name="action_refresh_rates"
+                        string="Refresh"
+                        type="object"
+                        class="btn-sm btn-secondary"
+                        invisible="state != 'expired'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_shipment_rate_form" model="ir.ui.view">
+        <field name="name">shipment.rate.form</field>
+        <field name="model">shipment.rate</field>
+        <field name="arch" type="xml">
+            <form string="Shipment Rate">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="carrier_name"/>
+                            <field name="carrier_scac"/>
+                            <field name="carrier_id"/>
+                            <field name="rate"/>
+                            <field name="transit_days"/>
+                        </group>
+                        <group>
+                            <field name="picking_id"/>
+                            <field name="batch_id"/>
+                            <field name="expiration_date"/>
+                            <field name="nexterus_quote_id"/>
+                        </group>
+                    </group>
+                    <group string="Shipment Information" invisible="state != 'used'">
+                        <field name="pro_number"/>
+                        <field name="tracking_number"/>
+                        <field name="shipment_date"/>
+                    </group>
+                    <group string="Packages">
+                        <field name="package_ids" nolabel="1">
+                            <list>
+                                <field name="name"/>
+                                <field name="shipping_weight"/>
+                                <field name="shipping_length" string="L" optional="show"/>
+                                <field name="shipping_width" string="W" optional="show"/>
+                                <field name="shipping_height" string="H" optional="show"/>
+                                <field name="nmfc_class"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

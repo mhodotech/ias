@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_put_in_pack_wizard_form" model="ir.ui.view">
+        <field name="name">put.in.pack.wizard.form</field>
+        <field name="model">put.in.pack.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Put in Pack">
+                <group>
+                    <group string="Package Information">
+                        <field name="package_type_id" required="1"/>
+                        <field name="shipping_weight" required="1"/>
+                        <label for="shipping_length" string="Dimensions (inches)"/>
+                        <div class="o_row">
+                            <field name="shipping_length" placeholder="L" required="1"/>
+                            <span>×</span>
+                            <field name="shipping_width" placeholder="W" required="1"/>
+                            <span>×</span>
+                            <field name="shipping_height" placeholder="H" required="1"/>
+                        </div>
+                        <field name="pcf" readonly="1"/>
+                        <field name="suggested_class" readonly="1"/>
+                    </group>
+                    <group string="Classification">
+                        <field name="nmfc_class" required="1"/>
+                        <field name="nmfc_code"/>
+                        <field name="commodity_description_id" required="1"/>
+                    </group>
+                </group>
+                <group string="Span Shipping">
+                    <group>
+                        <field name="span_package_type_id"/>
+                        <field name="span_package_qty"/>
+                    </group>
+                    <group>
+                        <field name="is_hazmat"/>
+                        <field name="special_handling" invisible="not is_hazmat"/>
+                    </group>
+                </group>
+                <group string="Products to Pack">
+                    <field name="move_line_ids" nolabel="1" readonly="1">
+                        <list>
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="product_uom_id"/>
+                        </list>
+                    </field>
+                </group>
+                <footer>
+                    <button name="action_create_package"
+                            string="Create Package"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

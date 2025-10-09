@@ -1,0 +1,27 @@
+/* Span Reports - Container Shipping Label Styles */
+
+@media print {
+    .container-shipping-label {
+        page-break-after: always;
+    }
+
+    .container-header {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .items-table th {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* Additional styles for better print output */
+.container-shipping-label * {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.container-shipping-label .page-break {
+    page-break-after: always;
+}

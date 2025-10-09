@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_span_package_type_user,span.package.type.user,model_span_package_type,stock.group_stock_user,1,0,0,0
+access_span_package_type_manager,span.package.type.manager,model_span_package_type,stock.group_stock_manager,1,1,1,1
+access_commodity_description_user,commodity.description.user,model_commodity_description,stock.group_stock_user,1,0,0,0
+access_commodity_description_manager,commodity.description.manager,model_commodity_description,stock.group_stock_manager,1,1,1,1
+access_carrier_close_config_user,carrier.close.config.user,model_carrier_close_config,stock.group_stock_user,1,0,0,0
+access_carrier_close_config_manager,carrier.close.config.manager,model_carrier_close_config,stock.group_stock_manager,1,1,1,1
+access_shipment_rate_user,shipment.rate.user,model_shipment_rate,stock.group_stock_user,1,1,1,0
+access_shipment_rate_manager,shipment.rate.manager,model_shipment_rate,stock.group_stock_manager,1,1,1,1
+access_put_in_pack_wizard,put.in.pack.wizard,model_put_in_pack_wizard,stock.group_stock_user,1,1,1,1
+access_get_rates_wizard,get.rates.wizard,model_get_rates_wizard,stock.group_stock_user,1,1,1,1
+access_get_rates_wizard_line,get.rates.wizard.line,model_get_rates_wizard_line,stock.group_stock_user,1,1,1,1
+access_close_carrier_wizard,close.carrier.wizard,model_close_carrier_wizard,stock.group_stock_user,1,1,1,1

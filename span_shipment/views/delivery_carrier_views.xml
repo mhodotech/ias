@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_delivery_carrier_form_span_shipment" model="ir.ui.view">
+        <field name="name">delivery.carrier.form.span.shipment</field>
+        <field name="model">delivery.carrier</field>
+        <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Nexterus Configuration" invisible="delivery_type != 'nexterus'">
+                    <group>
+                        <group string="API Credentials">
+                            <field name="nexterus_username" required="delivery_type == 'nexterus'"/>
+                            <field name="nexterus_password" password="1" required="delivery_type == 'nexterus'"/>
+                            <field name="nexterus_scac"/>
+                        </group>
+                        <group string="Default Settings">
+                            <field name="nexterus_default_freight_class"/>
+                            <field name="nexterus_close_time" widget="float_time"/>
+                            <field name="nexterus_ready_time" widget="float_time"/>
+                            <field name="nexterus_rate_expiration"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

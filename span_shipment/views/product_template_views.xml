@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_product_template_form_span_shipment" model="ir.ui.view">
+        <field name="name">product.template.form.span.shipment</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='weight']/ancestor::group[1]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='volume']/ancestor::group[1]" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='hs_code']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='country_of_origin']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//page[@name='inventory']" position="after">
+                <page string="Shipping Info" name="shipping_info">
+                    <group>
+                        <group string="Weight and Volume">
+                            <field name="weight"/>
+                            <field name="volume"/>
+                        </group>
+                        <group string="International Shipping">
+                            <field name="hs_code"/>
+                            <field name="country_of_origin"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Dimensions">
+                            <label for="product_length" string="Dimensions (inches)"/>
+                            <div class="o_row">
+                                <field name="product_length" placeholder="L"/>
+                                <span>×</span>
+                                <field name="product_width" placeholder="W"/>
+                                <span>×</span>
+                                <field name="product_height" placeholder="H"/>
+                            </div>
+                            <field name="pcf" readonly="1"/>
+                        </group>
+                        <group string="NMFC Classification">
+                            <field name="nmfc_code"/>
+                            <field name="nmfc_class"/>
+                            <field name="nmfc_description_id"/>
+                        </group>
+                    </group>
+                    <group string="Special Handling">
+                        <field name="is_hazmat"/>
+                        <field name="special_handling" invisible="not is_hazmat"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main EDI menu under Inventory -->
+    <menuitem id="menu_edi_root"
+              name="EDI Integration"
+              parent="stock.menu_stock_root"
+              sequence="95"/>
+
+    <!-- Configuration menu -->
+    <menuitem id="menu_edi_config_root"
+              name="Configuration"
+              parent="menu_edi_root"
+              sequence="10"/>
+
+    <menuitem id="menu_edi_config"
+              name="EDI Settings"
+              parent="menu_edi_config_root"
+              action="action_edi_config"
+              sequence="10"/>
+
+    <!-- Operations menu -->
+    <menuitem id="menu_edi_operations"
+              name="Operations"
+              parent="menu_edi_root"
+              sequence="20"/>
+
+    <menuitem id="menu_edi_manual_generate"
+              name="Generate EDI 856"
+              parent="menu_edi_operations"
+              action="action_edi_manual_generate"
+              sequence="10"/>
+
+    <menuitem id="menu_edi_log"
+              name="EDI Logs"
+              parent="menu_edi_operations"
+              action="action_edi_log"
+              sequence="20"/>
+</odoo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="module_category_edi" model="ir.module.category">
+            <field name="name">EDI Integration</field>
+            <field name="description">TrueCommerce EDI Integration</field>
+            <field name="sequence">55</field>
+        </record>
+
+        <record id="group_edi_user" model="res.groups">
+            <field name="name">EDI User</field>
+            <field name="category_id" ref="module_category_edi"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="group_edi_manager" model="res.groups">
+            <field name="name">EDI Manager</field>
+            <field name="category_id" ref="module_category_edi"/>
+            <field name="implied_ids" eval="[(4, ref('group_edi_user'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+    </data>
+</odoo>

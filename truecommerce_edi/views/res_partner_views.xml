@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_edi" model="ir.ui.view">
+        <field name="name">res.partner.form.edi</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="EDI Settings" name="edi_settings">
+                    <group>
+                        <group string="EDI Configuration">
+                            <field name="edi_enabled"/>
+                            <field name="edi_id" invisible="not edi_enabled"/>
+                            <field name="edi_id_qualifier" invisible="not edi_enabled"/>
+                        </group>
+                        <group string="EDI Options" invisible="not edi_enabled">
+                            <field name="edi_config_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Customer Item Numbers" invisible="not edi_enabled">
+                        <field name="customer_item_ids" nolabel="1">
+                            <list editable="bottom">
+                                <field name="product_id"/>
+                                <field name="customer_code"/>
+                                <field name="active" widget="boolean_toggle"/>
+                            </list>
+                        </field>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record id="view_edi_partner_config_form" model="ir.ui.view">
+        <field name="name">edi.partner.config.form</field>
+        <field name="model">edi.partner.config</field>
+        <field name="arch" type="xml">
+            <form string="Partner EDI Configuration">
+                <sheet>
+                    <group>
+                        <field name="partner_id" readonly="1"/>
+                    </group>
+                    <group>
+                        <group string="EDI Identifiers">
+                            <field name="edi_id" required="1"/>
+                            <field name="edi_id_qualifier" required="1"/>
+                            <field name="location_code"/>
+                            <field name="special_qualifier"/>
+                        </group>
+                        <group string="Document Options">
+                            <field name="include_pack_level"/>
+                            <field name="include_item_serial"/>
+                            <field name="use_customer_item_number"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_edi_partner_config_form" model="ir.actions.act_window">
+        <field name="name">Partner EDI Configuration</field>
+        <field name="res_model">edi.partner.config</field>
+        <field name="view_mode">form</field>
+        <field name="context">{'create': True}</field>
+    </record>
+</odoo>

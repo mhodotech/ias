@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_edi" model="ir.ui.view">
+        <field name="name">stock.picking.form.edi</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <!-- Add smart button -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_edi_logs"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-file-text"
+                        invisible="edi_log_count == 0">
+                    <field name="edi_log_count" widget="statinfo" string="EDI Logs"/>
+                </button>
+            </xpath>
+
+            <!-- Add EDI fields -->
+            <notebook position="inside">
+                <page string="EDI Info" name="edi_info" invisible="picking_type_id.code != 'outgoing'">
+                    <group>
+                        <group string="EDI Status">
+                            <field name="edi_file_generated" readonly="1"/>
+                            <field name="edi_file_name" readonly="1" invisible="not edi_file_generated"/>
+                            <field name="edi_generation_date" readonly="1" invisible="not edi_file_generated"/>
+                        </group>
+                        <group string="Actions">
+                            <button name="action_generate_edi"
+                                    string="Generate EDI 856"
+                                    type="object"
+                                    class="btn-secondary"
+                                    invisible="state != 'done' or picking_type_id.code != 'outgoing'"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record id="view_picking_list_edi" model="ir.ui.view">
+        <field name="name">stock.picking.list.edi</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <field name="state" position="after">
+                <field name="edi_file_generated" optional="show" widget="boolean_toggle"/>
+            </field>
+        </field>
+    </record>
+</odoo>

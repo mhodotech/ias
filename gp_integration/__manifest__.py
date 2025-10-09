@@ -47,7 +47,8 @@
         'views/menu_views.xml',
     ],
     'installable': True,
-    'application': False,
+    'application': True,
+    'sequence' : '3',
     'auto_install': False,
     'license': 'LGPL-3',
     'external_dependencies': {

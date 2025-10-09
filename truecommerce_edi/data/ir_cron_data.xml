@@ -1,0 +1,13 @@
+<odoo>
+    <data noupdate="1">
+        <record id="ir_cron_generate_edi_856" model="ir.cron">
+            <field name="name">EDI: Generate 856 Files</field>
+            <field name="model_id" ref="model_edi_config"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_generate_edi_856_files()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_edi_manual_generate_wizard" model="ir.ui.view">
+        <field name="name">edi.manual.generate.wizard.form</field>
+        <field name="model">edi.manual.generate.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate EDI 856 Files">
+                <group>
+                    <group string="Date Range">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group string="Options">
+                        <field name="regenerate"/>
+                    </group>
+                </group>
+                <group string="Filters">
+                    <field name="partner_ids" widget="many2many_tags"/>
+                    <field name="picking_ids" widget="many2many_tags"/>
+                </group>
+                <footer>
+                    <button name="action_generate"
+                            string="Generate EDI"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_edi_manual_generate" model="ir.actions.act_window">
+        <field name="name">Generate EDI 856</field>
+        <field name="res_model">edi.manual.generate.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

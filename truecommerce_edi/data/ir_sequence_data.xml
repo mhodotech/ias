@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_edi_control_number" model="ir.sequence">
+            <field name="name">EDI Control Number</field>
+            <field name="code">edi.control.number</field>
+            <field name="padding">9</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <record id="seq_edi_group_number" model="ir.sequence">
+            <field name="name">EDI Group Number</field>
+            <field name="code">edi.group.number</field>
+            <field name="padding">7</field>
+            <field name="number_increment">100</field>
+        </record>
+    </data>
+</odoo>

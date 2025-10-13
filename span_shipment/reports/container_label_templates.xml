@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Template for Single Picking -->
+    <template id="report_container_label_picking">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="picking">
+                <t t-call="span_shipment.report_container_label_document" t-context="{'picking': picking}"/>
+            </t>
+        </t>
+    </template>
+
+    <!-- Template for Batch -->
+    <template id="report_container_label_batch">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="batch">
+                <t t-foreach="batch.picking_ids.filtered(lambda p: p.picking_type_id.code == 'outgoing')" t-as="picking">
+                    <t t-call="span_shipment.report_container_label_document" t-context="{'picking': picking}"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Main Document Template -->
+    <template id="report_container_label_document">
+        <t t-set="packages" t-value="picking.move_line_ids.mapped('result_package_id')"/>
+        <t t-if="not packages">
+            <!-- If no packages, create one virtual package for all items -->
+            <div class="page container-label-page">
+                <t t-call="span_shipment.container_label_content">
+                    <t t-set="package" t-value="False"/>
+                    <t t-set="package_name" t-value="'NO PACKAGE'"/>
+                    <t t-set="container_number" t-value="1"/>
+                    <t t-set="total_containers" t-value="1"/>
+                </t>
+            </div>
+        </t>
+        <t t-else="">
+            <!-- One label per package -->
+            <t t-set="total_containers" t-value="len(packages)"/>
+            <t t-foreach="packages" t-as="package">
+                <div class="page container-label-page">
+                    <t t-call="span_shipment.container_label_content">
+                        <t t-set="container_number" t-value="package_index + 1"/>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Container Label Content -->
+    <template id="container_label_content">
+        <div style="display: flex; justify-content: center; padding: 20px;">
+            <div style="width: 120mm; border: 2px solid #333; background: white; padding: 10px; font-family: Arial, sans-serif; font-size: 12px;">
+
+                <!-- Header Section -->
+                <div style="border: 1px solid black; padding: 5px; margin-bottom: 5px;">
+                    <h3 style="text-align: center; margin: 0 0 5px 0; font-size: 16px; font-weight: bold;">Container Contents</h3>
+                    <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 2px; width: 50%;"><strong>Shipment#:</strong> <span t-field="picking.name"/></td>
+                            <td style="padding: 2px; width: 50%;">
+                                <strong>Order#:</strong>
+                                <t t-set="pick_order" t-value="picking.sale_id.picking_ids.filtered(lambda p: p.picking_type_id.code == 'internal' and 'Pick' in (p.picking_type_id.name or ''))[:1] if picking.sale_id else False"/>
+                                <span t-esc="pick_order.name if pick_order else picking.origin or ''"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 2px;"><strong>Date:</strong> <span t-field="picking.scheduled_date" t-options='{"widget": "date"}'/></td>
+                            <td style="padding: 2px;">
+                                <strong>PO#:</strong>
+                                <span t-esc="picking.sale_id.gp_cstponbr if picking.sale_id else ''"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Ship To Section -->
+                <div style="border: 1px solid black; padding: 5px; margin-bottom: 5px;">
+                    <div style="font-weight: bold; margin-bottom: 3px; font-size: 11px;">SHIP TO:</div>
+                    <div style="margin-left: 10px; font-size: 11px; line-height: 1.4;">
+                        <div><t t-esc="picking.partner_id.name"/></div>
+                        <div><t t-esc="picking.partner_id.street or ''"/></div>
+                        <t t-if="picking.partner_id.street2">
+                            <div><t t-esc="picking.partner_id.street2"/></div>
+                        </t>
+                        <div>
+                            <t t-esc="picking.partner_id.city or ''"/>
+                            <t t-if="picking.partner_id.state_id">, <t t-esc="picking.partner_id.state_id.code"/></t>
+                            <t t-if="picking.partner_id.zip"> <t t-esc="picking.partner_id.zip"/></t>
+                        </div>
+                        <t t-if="picking.partner_id.country_id">
+                            <div><t t-esc="picking.partner_id.country_id.name"/></div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Carrier Section -->
+                <div style="border: 1px solid black; padding: 5px; margin-bottom: 5px;">
+                    <div style="background-color: #FFFF99; padding: 3px; margin-bottom: 5px;">
+                        <strong>Carrier:</strong>
+                        <span style="font-size: 13px; font-weight: bold;">
+                            <t t-esc="picking.carrier_id.name if picking.carrier_id else 'Not Assigned'"/>
+                        </span>
+                    </div>
+                    <div style="margin-top: 5px;">
+                        <strong>PRO Number:</strong>
+                        <span style="font-size: 12px; font-weight: bold;">
+                            <t t-esc="picking.carrier_tracking_ref or 'N/A'"/>
+                        </span>
+                    </div>
+
+                    <!-- Barcode for PRO Number using Odoo 18 syntax -->
+                    <t t-if="picking.carrier_tracking_ref">
+                        <div style="text-align: center; margin: 10px 0;">
+                            <span t-field="picking.carrier_tracking_ref"
+                                  t-options="{'widget': 'barcode',
+                                             'width': 600,
+                                             'height': 150,
+                                             'img_style': 'width:300px;height:50px;'}"/>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Items Table -->
+                <div style="border: 1px solid black; padding: 5px; margin-bottom: 5px;">
+                    <table style="width: 100%; font-size: 10px; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background-color: #f0f0f0;">
+                                <th style="border-bottom: 1px solid black; padding: 3px; width: 15%; text-align: center; font-weight: bold;">Qty</th>
+                                <th style="border-bottom: 1px solid black; padding: 3px; width: 30%; text-align: center; font-weight: bold;">Item#</th>
+                                <th style="border-bottom: 1px solid black; padding: 3px; width: 55%; text-align: left; font-weight: bold;">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-if="package">
+                                <!-- Items in this specific package -->
+                                <t t-foreach="picking.move_line_ids.filtered(lambda ml: ml.result_package_id == package)" t-as="move_line">
+                                    <tr>
+                                        <td style="padding: 3px; text-align: center;">
+                                            <t t-esc="int(move_line.qty_done) if move_line.qty_done else int(move_line.quantity)"/>
+                                        </td>
+                                        <td style="padding: 3px; text-align: center;">
+                                            <t t-esc="move_line.product_id.default_code or ''"/>
+                                        </td>
+                                        <td style="padding: 3px;">
+                                            <t t-esc="move_line.product_id.name"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </t>
+                            <t t-else="">
+                                <!-- All items if no packages -->
+                                <t t-foreach="picking.move_line_ids" t-as="move_line">
+                                    <tr>
+                                        <td style="padding: 3px; text-align: center;">
+                                            <t t-esc="int(move_line.qty_done) if move_line.qty_done else int(move_line.quantity)"/>
+                                        </td>
+                                        <td style="padding: 3px; text-align: center;">
+                                            <t t-esc="move_line.product_id.default_code or ''"/>
+                                        </td>
+                                        <td style="padding: 3px;">
+                                            <t t-esc="move_line.product_id.name"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Package Info -->
+                <div style="border: 1px solid black; padding: 5px;">
+                    <t t-if="package">
+                        <div style="font-size: 11px; display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>Package:</strong> <t t-esc="package.name"/></span>
+                            <span>Container <t t-esc="container_number"/> of <t t-esc="total_containers"/></span>
+                        </div>
+                        <!-- Package Barcode using Odoo 18 syntax -->
+                        <div style="text-align: center; margin-top: 8px;">
+                            <span t-field="package.name"
+                                  t-options="{'widget': 'barcode',
+                                             'width': 600,
+                                             'height': 150,
+                                             'img_style': 'width:300px;height:50px;'}"/>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div style="text-align: center; font-size: 11px;">
+                            Container 1 of 1
+                        </div>
+                    </t>
+                </div>
+
+            </div>
+        </div>
+    </template>
+</odoo>

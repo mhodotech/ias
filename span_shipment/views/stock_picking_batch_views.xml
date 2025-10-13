@@ -18,6 +18,11 @@
                         type="object"
                         class="btn-primary"
                         invisible="state in ['done', 'cancel']"/>
+                <button name="%(span_shipment.action_report_container_label_batch)d"
+                        string="Print Container Labels"
+                        type="action"
+                        class="btn-secondary"
+                />
             </xpath>
 
             <!-- Add smart button -->

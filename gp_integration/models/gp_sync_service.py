@@ -140,6 +140,7 @@ class GPSyncService(models.Model):
             WHERE SOPTYPE = 2
             AND PCKSLPNO IS NOT NULL 
             AND PCKSLPNO != ''
+            AND ACTLSHIP < 2000
             ORDER BY DOCDATE DESC
         """
 

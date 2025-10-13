@@ -44,6 +44,13 @@
         'mail',
         'stock_picking_batch',
     ],
+
+    'assets': {
+            'web.report_assets_common': [
+                'span_shipment/static/src/css/container_label.css',
+            ],
+        },
+
     'data': [
         # Security
         'security/ir.model.access.csv',
@@ -51,6 +58,11 @@
         # Data files
         'data/span_shipment_data.xml',
         'data/email_template.xml',
+        'data/paperformat.xml',
+
+        # Reports
+        'reports/container_label_report.xml',
+        'reports/container_label_templates.xml',
 
         # Views - Order matters!
         'views/product_template_views.xml',

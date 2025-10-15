@@ -5,10 +5,68 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
+            <!-- Add GP fields after VAT -->
             <field name="vat" position="after">
                 <field name="gp_custnmbr" readonly="1"
                        invisible="not gp_custnmbr"/>
+                <field name="gp_custclas" readonly="1"
+                       invisible="not gp_custclas"/>
+                <field name="gp_prclevel" readonly="1"
+                       invisible="not gp_prclevel"/>
             </field>
+
+            <!-- Add GP tab in notebook -->
+            <notebook position="inside">
+                <page string="GP Info" name="gp_info"
+                      invisible="not gp_custnmbr">
+                    <group>
+                        <group string="GP References">
+                            <field name="gp_custnmbr" readonly="1"/>
+                            <field name="gp_custname" readonly="1"/>
+                            <field name="gp_custclas" readonly="1"/>
+                            <field name="gp_prclevel" readonly="1"/>
+                            <field name="gp_adrscode" readonly="1" invisible="not parent_id"/>
+                            <field name="gp_last_sync" readonly="1"/>
+                        </group>
+                        <group string="Actions" invisible="parent_id">
+                            <button name="sync_from_gp"
+                                    type="object"
+                                    string="Sync from GP"
+                                    class="btn-secondary"
+                                    icon="fa-refresh"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record id="view_partner_list_gp_inherit" model="ir.ui.view">
+        <field name="name">res.partner.list.gp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <field name="email" position="after">
+                <field name="gp_custnmbr" optional="show"/>
+                <field name="gp_last_sync" optional="hide" widget="datetime"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Add search filters -->
+    <record id="view_partner_search_gp_inherit" model="ir.ui.view">
+        <field name="name">res.partner.search.gp</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <search position="inside">
+                <field name="gp_custnmbr"/>
+                <separator/>
+                <filter string="GP Customers" name="gp_customers"
+                        domain="[('gp_custnmbr', '!=', False)]"/>
+                <filter string="Non-GP Customers" name="non_gp_customers"
+                        domain="[('gp_custnmbr', '=', False)]"/>
+            </search>
         </field>
     </record>
 </odoo>

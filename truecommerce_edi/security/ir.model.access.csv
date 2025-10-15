@@ -5,6 +5,7 @@ access_edi_partner_config_user,edi.partner.config.user,model_edi_partner_config,
 access_edi_partner_config_manager,edi.partner.config.manager,model_edi_partner_config,group_edi_manager,1,1,1,1
 access_edi_log_user,edi.log.user,model_edi_log,group_edi_user,1,0,0,0
 access_edi_log_manager,edi.log.manager,model_edi_log,group_edi_manager,1,1,1,1
+access_edi_generator,edi.generator,model_edi_generator,group_edi_user,1,0,0,0
 access_edi_manual_generate_wizard,edi.manual.generate.wizard,model_edi_manual_generate_wizard,group_edi_user,1,1,1,1
 access_product_customer_code_user,product.customer.code.user,model_product_customer_code,group_edi_user,1,1,1,0
 access_product_customer_code_manager,product.customer.code.manager,model_product_customer_code,group_edi_manager,1,1,1,1

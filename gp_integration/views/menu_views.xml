@@ -1,33 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Create a new main menu item under Job Queue root, next to Queue -->
+    <!-- Actions must be defined before menu items -->
+
+    <!-- Main menu item under Job Queue root -->
     <menuitem id="menu_gp_integration_main"
               name="GP Integration"
               parent="queue_job.menu_queue_job_root"
               sequence="20"/>
 
-    <!-- GP Integration menu items under our main menu -->
-    <menuitem id="menu_gp_sync_wizard"
-              name="Sync from GP"
+    <!-- Operations Menu -->
+    <menuitem id="menu_gp_operations"
+              name="Operations"
               parent="menu_gp_integration_main"
+              sequence="10"/>
+
+    <!-- Order Sync -->
+    <menuitem id="menu_gp_sync_wizard"
+              name="Sync Orders from GP"
+              parent="menu_gp_operations"
               action="action_gp_sync_wizard"
               sequence="10"/>
 
+    <!-- Product Sync -->
+    <menuitem id="menu_gp_product_sync_wizard"
+              name="Sync Products from GP"
+              parent="menu_gp_operations"
+              action="action_gp_product_sync_wizard"
+              sequence="15"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_gp_configuration"
+              name="Configuration"
+              parent="menu_gp_integration_main"
+              sequence="20"/>
+
     <menuitem id="menu_gp_config"
               name="GP Configuration"
-              parent="menu_gp_integration_main"
+              parent="menu_gp_configuration"
               action="action_gp_config"
-              sequence="20"/>
+              sequence="10"/>
+
+    <!-- Logs Menu -->
+    <menuitem id="menu_gp_logs"
+              name="Logs"
+              parent="menu_gp_integration_main"
+              sequence="30"/>
 
     <menuitem id="menu_gp_sync_log"
               name="Sync Logs"
-              parent="menu_gp_integration_main"
+              parent="menu_gp_logs"
               action="action_gp_sync_log"
-              sequence="30"/>
+              sequence="10"/>
 
+    <menuitem id="menu_gp_product_sync_history"
+              name="Product Sync History"
+              parent="menu_gp_logs"
+              action="action_gp_product_sync"
+              sequence="20"/>
+
+    <!-- Notifications Menu -->
     <menuitem id="menu_gp_shipment_notification"
               name="Shipment Notifications"
               parent="menu_gp_integration_main"
               action="action_gp_shipment_notification"
               sequence="40"/>
+
+    <!-- Quick Access Menu in Inventory -->
+    <menuitem id="menu_gp_inventory_sync"
+              name="GP Sync"
+              parent="stock.menu_stock_warehouse_mgmt"
+              sequence="100"/>
+
+    <menuitem id="menu_gp_inventory_product_sync"
+              name="Sync Products from GP"
+              parent="menu_gp_inventory_sync"
+              action="action_gp_product_sync_wizard"
+              sequence="10"/>
+
+    <menuitem id="menu_gp_inventory_order_sync"
+              name="Sync Orders from GP"
+              parent="menu_gp_inventory_sync"
+              action="action_gp_sync_wizard"
+              sequence="20"/>
 </odoo>

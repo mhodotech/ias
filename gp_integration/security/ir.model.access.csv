@@ -8,3 +8,6 @@ access_gp_sync_service_manager,gp.sync.service manager,model_gp_sync_service,bas
 access_gp_sync_wizard,access_gp_sync_wizard,model_gp_sync_wizard,base.group_user,1,1,1,1
 access_gp_shipment_notification_user,gp.shipment.notification.user,model_gp_shipment_notification,gp_integration_group_user,1,0,0,0
 access_gp_shipment_notification_manager,gp.shipment.notification.manager,model_gp_shipment_notification,gp_integration_group_manager,1,1,1,1
+access_gp_product_sync_user,gp.product.sync user,model_gp_product_sync,base.group_user,1,0,0,0
+access_gp_product_sync_manager,gp.product.sync manager,model_gp_product_sync,base.group_system,1,1,1,1
+access_gp_product_sync_wizard,gp.product.sync.wizard,model_gp_product_sync_wizard,base.group_user,1,1,1,1

@@ -45,6 +45,7 @@ class GPSyncService(models.Model):
 
                     # Get line items
                     line_data = self._fetch_order_lines(cursor, sopnumbe)
+                    order_data = self._prepare_customer_data(order_data)
 
                     # Check fulfillment status
                     order_data['has_fulfillment'] = self._check_fulfillment(cursor, sopnumbe)
@@ -327,3 +328,26 @@ class GPSyncService(models.Model):
                 'sticky': False,
             }
         }
+
+    def _prepare_customer_data(self, gp_data):
+        """Prepare customer data with proper type conversion"""
+        # Convert CUSTNMBR from integer to string
+        if 'CUSTNMBR' in gp_data:
+            gp_data['CUSTNMBR'] = str(gp_data['CUSTNMBR']).strip()
+
+        # Ensure other fields are properly formatted
+        string_fields = ['CUSTNAME', 'CNTCPRSN', 'ShipToName', 'ADDRESS1',
+                         'ADDRESS2', 'ADDRESS3', 'CITY', 'STATE', 'COUNTRY',
+                         'SHIPMTHD', 'SALSTERR', 'SLPRSNID', 'PRSTADCD']
+
+        for field in string_fields:
+            if field in gp_data and gp_data[field]:
+                gp_data[field] = str(gp_data[field]).strip()
+
+        # Handle ZIP/ZIPCODE which might be integer
+        if 'ZIPCODE' in gp_data and gp_data['ZIPCODE']:
+            gp_data['ZIPCODE'] = str(gp_data['ZIPCODE']).strip()
+        if 'ZIP' in gp_data and gp_data['ZIP']:
+            gp_data['ZIP'] = str(gp_data['ZIP']).strip()
+
+        return gp_data

@@ -6,3 +6,4 @@ from . import product_template
 from . import res_partner
 from . import gp_sync_log
 from . import gp_shipment_notification
+from . import product_sync

@@ -25,7 +25,6 @@
         'sale_stock',
         'product',
         'gp_integration',
-        'span_shipment',
     ],
     'data': [
         'security/edi_security.xml',

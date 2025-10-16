@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="span_shipment.OpeningScreen" owl="1">
+        <div class="span_shipment_opening_screen h-100 d-flex flex-column">
+            <div class="container-fluid">
+                <!-- Header Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h1 class="text-center mb-3">Shipping Operations Center</h1>
+                        <h3 class="text-center mb-4">Quick Access to All Shipping Functions</h3>
+                    </div>
+                </div>
+
+                <!-- Main Operations Section -->
+                <div class="section-header">
+                    <h4>Main Operations</h4>
+                </div>
+
+                <div class="row g-3 justify-content-center mb-4">
+                    <!-- Scan Picking Order -->
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card h-100 action-card scan-card" t-on-click="openBarcodeScanning">
+                            <div class="card-body text-center">
+                                <i class="fa fa-barcode fa-3x mb-3"/>
+                                <h5 class="card-title">Scan Picking Order</h5>
+                                <p class="card-text small">Open barcode scanner to validate orders</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Create Batch -->
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card h-100 action-card batch-card" t-on-click="createBatch">
+                            <div class="card-body text-center">
+                                <i class="fa fa-layer-group fa-3x mb-3"/>
+                                <h5 class="card-title">Create Batch</h5>
+                                <p class="card-text small">Group multiple orders for batch picking</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pack & Get Rates with Options -->
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card h-100 action-card pack-card">
+                            <div class="card-body text-center">
+                                <i class="fa fa-box fa-3x mb-3"/>
+                                <h5 class="card-title">Pack &amp; Get Rates</h5>
+                                <p class="card-text small mb-3">Select type to process:</p>
+                                <div class="d-flex flex-column gap-2">
+                                    <button class="btn btn-sm btn-outline-warning" t-on-click="showPickingOrdersForRates">
+                                        <i class="fa fa-file-alt me-1"/> Picking Orders
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning" t-on-click="showBatchPickingsForRates">
+                                        <i class="fa fa-layer-group me-1"/> Batch Pickings
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products -->
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card h-100 action-card product-card" t-on-click="viewProducts">
+                            <div class="card-body text-center">
+                                <i class="fa fa-cube fa-3x mb-3"/>
+                                <h5 class="card-title">Products</h5>
+                                <p class="card-text small">View and manage product catalog</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Close Carriers -->
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card h-100 action-card carrier-card" t-on-click="closeCarriers">
+                            <div class="card-body text-center">
+                                <i class="fa fa-truck fa-3x mb-3"/>
+                                <h5 class="card-title">Close Carriers</h5>
+                                <p class="card-text small">Finalize carrier shipments</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Print Reports Section -->
+                <div class="section-header section-mt">
+                    <h4>Print Shipping Documents</h4>
+                </div>
+
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="print-reports-card">
+                            <h5><i class="fa fa-print text-danger me-2"/>Print Reports</h5>
+                            <div class="form-group">
+                                <label for="pickingSearchInput">Search Order (Pick/Pack/Deliver):</label>
+                                <div class="input-group">
+                                    <input type="text"
+                                           class="form-control form-control-lg"
+                                           t-ref="pickingSearchInput"
+                                           placeholder="Enter order number (e.g., WH/OUT/00001)"/>
+                                    <button class="btn btn-secondary"
+                                            type="button"
+                                            t-on-click="searchPicking">
+                                        <i class="fa fa-search"/> Search
+                                    </button>
+                                </div>
+                                <t t-if="state.selectedPickingName">
+                                    <small class="text-success mt-1 d-block">
+                                        <i class="fa fa-check"/> Selected: <t t-esc="state.selectedPickingName"/>
+                                    </small>
+                                </t>
+                            </div>
+                            <div class="d-flex justify-content-center gap-2 mt-3">
+                                <button class="btn btn-primary quick-action-btn" t-on-click="printContainerLabel">
+                                    <i class="fa fa-tag"/> Container Label
+                                </button>
+                                <button class="btn btn-info quick-action-btn" t-on-click="printReports">
+                                    <i class="fa fa-file-alt"/> All Reports
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integration Section -->
+                <div class="section-header section-mt">
+                    <h4>Integration Tools</h4>
+                </div>
+
+                <div class="row g-3 justify-content-center mb-4 integration-section">
+                    <!-- View EDI 856 Logs -->
+                    <div class="col-md-4 col-lg-3">
+                        <div class="card h-100 action-card integration-card" t-on-click="viewEDI856Logs">
+                            <div class="card-body text-center">
+                                <i class="fa fa-file-invoice fa-3x mb-3"/>
+                                <h5 class="card-title">EDI 856 Logs</h5>
+                                <p class="card-text small">View shipment notification logs</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generate EDI 856 -->
+                    <div class="col-md-4 col-lg-3">
+                        <div class="card h-100 action-card integration-card" t-on-click="generateEDI856">
+                            <div class="card-body text-center">
+                                <i class="fa fa-file-export fa-3x mb-3"/>
+                                <h5 class="card-title">Generate EDI 856</h5>
+                                <p class="card-text small">Create shipment notifications</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration Section -->
+                <div class="section-header section-mt">
+                    <h4>Configuration</h4>
+                </div>
+
+                <div class="row g-3 justify-content-center mb-4 config-section">
+                    <!-- GP Configuration -->
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card h-100 action-card config-card" t-on-click="openGPConfiguration">
+                            <div class="card-body text-center">
+                                <i class="fa fa-cog fa-3x mb-3"/>
+                                <h5 class="card-title">GP Configuration</h5>
+                                <p class="card-text small">Configure GP integration</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EDI Settings -->
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card h-100 action-card config-card" t-on-click="openEDISettings">
+                            <div class="card-body text-center">
+                                <i class="fa fa-exchange-alt fa-3x mb-3"/>
+                                <h5 class="card-title">EDI Settings</h5>
+                                <p class="card-text small">Configure EDI parameters</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Methods -->
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card h-100 action-card config-card" t-on-click="openDeliveryMethods">
+                            <div class="card-body text-center">
+                                <i class="fa fa-shipping-fast fa-3x mb-3"/>
+                                <h5 class="card-title">Delivery Methods</h5>
+                                <p class="card-text small">Manage shipping carriers</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customers -->
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card h-100 action-card config-card" t-on-click="openCustomers">
+                            <div class="card-body text-center">
+                                <i class="fa fa-users fa-3x mb-3"/>
+                                <h5 class="card-title">Customers</h5>
+                                <p class="card-text small">Manage customer records</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links Footer -->
+                <div class="row mt-4 mb-3">
+                    <div class="col-12 text-center">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-light" t-on-click="viewBatches">
+                                <i class="fa fa-th-list"/> View Batches
+                            </button>
+                            <button class="btn btn-outline-light" t-on-click="viewPackages">
+                                <i class="fa fa-boxes"/> View Packages
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

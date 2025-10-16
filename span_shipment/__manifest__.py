@@ -43,12 +43,19 @@
         'product',
         'mail',
         'stock_picking_batch',
+        'gp_integration',  # Add this if not already there
+        'truecommerce_edi',
     ],
 
     'assets': {
             'web.report_assets_common': [
                 'span_shipment/static/src/css/container_label.css',
             ],
+            'web.assets_backend': [
+                        'span_shipment/static/src/css/span_shipment_opening_screen.css',
+                        'span_shipment/static/src/js/span_shipment_opening_screen.js',
+                        'span_shipment/static/src/xml/span_shipment_opening_screen.xml',
+                    ],
         },
 
     'data': [
@@ -75,6 +82,7 @@
         'views/carrier_close_config_views.xml',
         'views/span_package_type_views.xml',
         'views/commodity_description_views.xml',
+        'views/span_shipment_opening_screen_menu.xml',
 
         # Wizard views
         'wizard/put_in_pack_wizard_views.xml',

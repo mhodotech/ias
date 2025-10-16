@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <!-- Override the Inventory root menu name -->
+    <record id="stock.menu_stock_root" model="ir.ui.menu">
+        <field name="name">Span Shipment</field>
+        <field name="sequence">-100</field>
+    </record>
+
+    <!-- Opening Screen Action -->
+    <record id="action_span_shipment_opening_screen" model="ir.actions.client">
+        <field name="name">Shipping Operations</field>
+        <field name="tag">span_shipment.opening_screen</field>
+    </record>
+
+    <!-- Add Opening Screen as First Menu in Inventory -->
+    <menuitem id="menu_span_shipment_opening"
+              name="Shipping Operations"
+              action="action_span_shipment_opening_screen"
+              parent="stock.menu_stock_root"
+              sequence="-100"/>
+
+    <!-- Optional: Add sub-menus for direct access if needed -->
+
+    <!-- Batch Management Menu -->
+    <record id="action_batch_picking_list" model="ir.actions.act_window">
+        <field name="name">Batch Pickings</field>
+        <field name="res_model">stock.picking.batch</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_batch_picking"
+              name="Batch Management"
+              action="action_batch_picking_list"
+              parent="stock.menu_stock_warehouse_mgmt"
+              sequence="15"
+              groups="stock.group_stock_user"/>
+
+    <!-- Close Carriers List Action -->
+    <record id="action_close_carriers_list" model="ir.actions.act_window">
+        <field name="name">Close Carriers</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[
+            ('picking_type_id.code', '=', 'outgoing'),
+            ('state', '=', 'assigned'),
+            ('carrier_id', '!=', False),
+        ]</field>
+        <field name="context">{'search_default_group_by_carrier': 1}</field>
+    </record>
+
+    <!-- Server action for Close Carriers (will be available in the action menu) -->
+    <record id="action_server_close_carriers" model="ir.actions.server">
+        <field name="name">Close Selected Carriers</field>
+        <field name="model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    wizard = env['close.carrier.wizard'].create({
+        'picking_ids': [(6, 0, records.ids)]
+    })
+    action = {
+        'name': 'Close Carriers',
+        'type': 'ir.actions.act_window',
+        'res_model': 'close.carrier.wizard',
+        'res_id': wizard.id,
+        'view_mode': 'form',
+        'target': 'new',
+    }
+        </field>
+    </record>
+
+    <menuitem id="menu_carrier_close"
+              name="Close Carriers"
+              action="action_close_carriers_list"
+              parent="stock.menu_stock_warehouse_mgmt"
+              sequence="20"
+              groups="stock.group_stock_user"/>
+
+    <!-- EDI Integration Menu (references truecommerce_edi module) -->
+    <menuitem id="menu_edi_integration_shortcut"
+              name="EDI Integration"
+              parent="stock.menu_stock_warehouse_mgmt"
+              sequence="25"
+              groups="stock.group_stock_manager"/>
+
+    <record id="action_edi_856_logs" model="ir.actions.act_window">
+        <field name="name">EDI 856 Logs</field>
+        <field name="res_model">edi.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_edi_856_logs"
+              name="EDI 856 Logs"
+              action="action_edi_856_logs"
+              parent="menu_edi_integration_shortcut"
+              sequence="10"/>
+
+    <record id="action_generate_edi_856" model="ir.actions.act_window">
+        <field name="name">Generate EDI 856</field>
+        <field name="res_model">edi.manual.generate.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_generate_edi_856"
+              name="Generate EDI 856"
+              action="action_generate_edi_856"
+              parent="menu_edi_integration_shortcut"
+              sequence="20"/>
+
+    <!-- Configuration Menus under Stock Config -->
+    <record id="action_gp_configuration" model="ir.actions.act_window">
+        <field name="name">GP Configuration</field>
+        <field name="res_model">gp.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_gp_configuration_shortcut"
+              name="GP Configuration"
+              action="action_gp_configuration"
+              parent="stock.menu_stock_config_settings"
+              sequence="100"
+              groups="stock.group_stock_manager"/>
+
+    <record id="action_edi_settings" model="ir.actions.act_window">
+        <field name="name">EDI Settings</field>
+        <field name="res_model">edi.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_edi_settings_shortcut"
+              name="EDI Settings"
+              action="action_edi_settings"
+              parent="stock.menu_stock_config_settings"
+              sequence="110"
+              groups="stock.group_stock_manager"/>
+</odoo>

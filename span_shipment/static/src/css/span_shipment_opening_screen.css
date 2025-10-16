@@ -1,0 +1,229 @@
+.span_shipment_opening_screen {
+    background: linear-gradient(135deg, #4a90e2 0%, #2c5aa0 100%);
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.span_shipment_opening_screen h1 {
+    color: white;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    font-size: 2.8rem;
+    margin-bottom: 1.8rem !important;
+}
+
+.span_shipment_opening_screen h3 {
+    color: white;
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem !important;
+    font-weight: 600;
+}
+
+/* Action cards */
+.action-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    min-height: 200px;
+    margin-bottom: 1rem;
+    background: white;
+}
+
+.action-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 18px rgba(0,0,0,0.15);
+}
+
+.action-card .card-body {
+    padding: 1.8rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.action-card i {
+    transition: all 0.3s ease;
+    font-size: 3rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.action-card:hover i {
+    transform: scale(1.12);
+}
+
+.action-card h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.action-card p {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+/* Color coding for different sections */
+.action-card.scan-card i { color: #28a745; }
+.action-card.batch-card i { color: #17a2b8; }
+.action-card.pack-card i { color: #ffc107; }
+.action-card.product-card i { color: #6c757d; }
+.action-card.report-card i { color: #dc3545; }
+.action-card.carrier-card i { color: #6610f2; }
+.action-card.integration-card i { color: #fd7e14; }
+.action-card.config-card i { color: #495057; }
+
+/* Print reports section */
+.print-reports-card {
+    background: rgba(255,255,255,0.98);
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.print-reports-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 22px rgba(0,0,0,0.15);
+}
+
+.print-reports-card h5 {
+    color: #333;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.print-reports-card .form-group {
+    margin-bottom: 1rem;
+}
+
+.print-reports-card label {
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 0.3rem;
+}
+
+/* Section headers */
+.section-header {
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h4 {
+    color: white;
+    margin: 0;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+/* Container adjustments */
+.span_shipment_opening_screen .container-fluid {
+    padding: 2rem 3rem;
+}
+
+.span_shipment_opening_screen .row.g-3 {
+    gap: 1rem !important;
+}
+
+/* Section spacing */
+.span_shipment_opening_screen .section-mt {
+    margin-top: 2.5rem !important;
+}
+
+/* Tablet and Mobile responsive */
+@media (max-width: 768px) {
+    .span_shipment_opening_screen {
+        min-height: auto;
+        padding-bottom: 2rem;
+    }
+
+    .span_shipment_opening_screen h1 {
+        font-size: 2rem;
+        margin-bottom: 1.2rem !important;
+    }
+
+    .span_shipment_opening_screen h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem !important;
+    }
+
+    .span_shipment_opening_screen .container-fluid {
+        padding: 1.5rem;
+    }
+
+    .action-card {
+        min-height: 160px;
+        margin-bottom: 0.8rem;
+    }
+
+    .action-card .card-body {
+        padding: 1.3rem 1rem;
+    }
+
+    .action-card i {
+        font-size: 2.5rem !important;
+    }
+
+    .action-card h5 {
+        font-size: 1rem;
+    }
+
+    .action-card p {
+        font-size: 0.8rem;
+    }
+
+    .print-reports-card {
+        padding: 1.2rem;
+    }
+
+    .section-header h4 {
+        font-size: 1.1rem;
+    }
+}
+
+/* Small mobile screens */
+@media (max-width: 480px) {
+    .span_shipment_opening_screen h1 {
+        font-size: 1.8rem;
+    }
+
+    .span_shipment_opening_screen h3 {
+        font-size: 1.2rem;
+    }
+
+    .action-card {
+        min-height: 140px;
+    }
+
+    .action-card i {
+        font-size: 2.2rem !important;
+    }
+
+    .action-card h5 {
+        font-size: 0.95rem;
+    }
+}
+
+/* Quick action buttons */
+.quick-action-btn {
+    min-width: 120px;
+    margin: 0.25rem;
+}
+
+/* Integration cards layout */
+.integration-section .action-card {
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+
+/* Config cards layout */
+.config-section .action-card {
+    background: linear-gradient(135deg, #fff 0%, #e9ecef 100%);
+}

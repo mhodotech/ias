@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
+_logger = logging.getLogger(__name__)
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
@@ -44,6 +46,55 @@ class StockPicking(models.Model):
         string='Rate Count',
         compute='_compute_shipment_rate_count'
     )
+
+    shipment_number = fields.Char(
+        string='Shipment #',
+        default=lambda self: self._generate_shipment_number(),
+        copy=False,
+        readonly=True,
+        tracking=True
+    )
+    third_party_freight_partner_id = fields.Many2one(
+        'res.partner',
+        string='Third Party Freight Charges Billed To',
+        compute='_compute_third_party_freight_partner',
+        store=True,
+        readonly=False,
+        tracking=True
+    )
+    trailer_number = fields.Char(string='Trailer Number', tracking=True)
+    seal_number = fields.Char(string='Seal Number', tracking=True)
+    freight_charge_terms = fields.Char(
+        string='Freight Charge Terms',
+        default='Prepaid',
+        tracking=True
+    )
+    master_bill_of_lading = fields.Boolean(
+        string='Master Bill of Lading',
+        default=False,
+        tracking=True
+    )
+
+    fob_ship_from = fields.Boolean(string='FOB Ship From', default=False)
+    fob_ship_to = fields.Boolean(string='FOB Ship To', default=False)
+
+    @api.model
+    def _generate_shipment_number(self):
+        """Generate a unique 7-digit shipment number"""
+        import random
+        while True:
+            number = str(random.randint(1000000, 9999999))
+            if not self.search([('shipment_number', '=', number)], limit=1):
+                return number
+
+    @api.depends('partner_id')
+    def _compute_third_party_freight_partner(self):
+        for picking in self:
+            partner = self.env['res.partner'].search([
+                ('third_party_freight_billing', '=', True)
+            ], limit=1)
+            if partner and not picking.third_party_freight_partner_id:
+                picking.third_party_freight_partner_id = partner
 
     @api.depends('shipment_rate_ids')
     def _compute_shipment_rate_count(self):
@@ -252,3 +303,59 @@ class StockPicking(models.Model):
             self._propagate_shipping_info()
 
         return res
+
+    def get_customer_po_for_bol(self):
+        """Helper method to get customer PO for Bill of Lading"""
+        self.ensure_one()
+        _logger.info(f"Getting customer PO for picking {self.name}")
+        _logger.info(f"Has sale_id: {bool(self.sale_id)}")
+
+        if self.sale_id:
+            _logger.info(f"Sale order: {self.sale_id.name}")
+            _logger.info(f"Has gp_cstponbr field: {hasattr(self.sale_id, 'gp_cstponbr')}")
+
+            if hasattr(self.sale_id, 'gp_cstponbr'):
+                _logger.info(f"gp_cstponbr value: {self.sale_id.gp_cstponbr}")
+                if self.sale_id.gp_cstponbr:
+                    return self.sale_id.gp_cstponbr
+
+            if self.sale_id.client_order_ref:
+                return self.sale_id.client_order_ref
+
+        return self.origin or ''
+
+    def get_packages_grouped_for_bol(self):
+        """Helper method to get packages grouped by type for BOL"""
+        self.ensure_one()
+        packages_by_type = {}
+        customer_po = self.get_customer_po_for_bol()
+
+        _logger.info(f"Grouping packages for picking {self.name}")
+        _logger.info(f"Customer PO: {customer_po}")
+        _logger.info(f"Number of move lines: {len(self.move_line_ids)}")
+
+        for ml in self.move_line_ids:
+            if ml.result_package_id:
+                package = ml.result_package_id
+                _logger.info(f"Found package: {package.name}")
+                _logger.info(f"Package type: {package.package_type_id.name if package.package_type_id else 'NO TYPE'}")
+                _logger.info(f"Span package qty: {package.span_package_qty}")
+                _logger.info(f"Shipping weight: {package.shipping_weight}")
+
+                pkg_type = package.package_type_id.name if package.package_type_id else 'PACKAGE'
+
+                if pkg_type not in packages_by_type:
+                    packages_by_type[pkg_type] = {
+                        'units': 0,
+                        'pkgs': 0,
+                        'weight': 0.0,
+                        'customer_po': customer_po,
+                        'picking_name': self.name
+                    }
+
+                packages_by_type[pkg_type]['units'] += 1
+                packages_by_type[pkg_type]['pkgs'] += package.span_package_qty or 0
+                packages_by_type[pkg_type]['weight'] += package.shipping_weight or 0.0
+
+        _logger.info(f"Grouped packages result: {packages_by_type}")
+        return packages_by_type

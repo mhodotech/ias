@@ -70,9 +70,12 @@
         # Reports
         'reports/container_label_report.xml',
         'reports/container_label_templates.xml',
+        'reports/bill_of_lading_report.xml',
+        'reports/bill_of_lading_templates.xml',
 
         # Views - Order matters!
         'views/product_template_views.xml',
+        'views/res_partner_views.xml',
         'views/stock_quant_package_views.xml',
         'views/delivery_carrier_views.xml',
         'views/stock_picking_views.xml',

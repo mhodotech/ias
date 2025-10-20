@@ -222,6 +222,54 @@ export class SpanShipmentOpeningScreen extends Component {
         }
     }
 
+    async printBillOfLading() {
+        if (!this.state.selectedPickingId) {
+            this.notification.add("Please search and select an order first", {
+                type: "warning",
+                title: "No Order Selected",
+            });
+            return;
+        }
+
+        // Print bill of lading report
+        try {
+            const action = await this.orm.call(
+                "ir.actions.report",
+                "get_action",
+                [this.state.selectedPickingId],
+                { report_name: "span_shipment.report_bill_of_lading_picking" }
+            );
+
+            if (action) {
+                await this.action.doAction(action);
+            } else {
+                // Fallback to direct report call
+                await this.action.doAction({
+                    type: "ir.actions.report",
+                    report_name: "span_shipment.report_bill_of_lading_picking",
+                    report_type: "qweb-pdf",
+                    data: null,
+                    context: {
+                        active_ids: [this.state.selectedPickingId],
+                        active_model: "stock.picking",
+                    },
+                });
+            }
+        } catch (error) {
+            // Final fallback
+            await this.action.doAction({
+                type: "ir.actions.report",
+                report_name: "span_shipment.report_bill_of_lading_picking",
+                report_type: "qweb-pdf",
+                data: null,
+                context: {
+                    active_ids: [this.state.selectedPickingId],
+                    active_model: "stock.picking",
+                },
+            });
+        }
+    }
+
     async closeCarriers() {
         // Open delivery orders list filtered for carrier closing
         await this.action.doAction({

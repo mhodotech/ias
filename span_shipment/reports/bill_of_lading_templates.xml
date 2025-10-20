@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Template for Single Picking -->
+    <template id="report_bill_of_lading_picking">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="span_shipment.report_bill_of_lading_document">
+                    <t t-set="o" t-value="doc"/>
+                    <t t-set="is_batch" t-value="False"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Template for Batch -->
+    <template id="report_bill_of_lading_batch">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="span_shipment.report_bill_of_lading_document">
+                    <t t-set="o" t-value="doc"/>
+                    <t t-set="is_batch" t-value="True"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Main Document Template -->
+    <template id="report_bill_of_lading_document">
+        <div class="page" style="font-family: Arial, sans-serif; font-size: 10pt;">
+            <!-- Header -->
+            <div style="margin-bottom: 10px;">
+                <div style="text-align: center;">
+                    <h3 style="margin: 0; font-size: 16pt;">BILL OF LADING</h3>
+                </div>
+                <div style="text-align: right; margin-top: 5px;">
+                    <span>Date: <t t-out="datetime.datetime.now().strftime('%m/%d/%Y')"/></span>
+<!--                    <span style="margin-left: 20px;">Page Number: 1</span>-->
+                </div>
+            </div>
+
+            <!-- Get warehouse and partner info -->
+            <t t-if="is_batch">
+                <t t-set="warehouse" t-value="o.picking_ids[0].sale_id.warehouse_id if o.picking_ids and o.picking_ids[0].sale_id else o.picking_ids[0].picking_type_id.warehouse_id if o.picking_ids else False"/>
+                <t t-set="partner" t-value="o.picking_ids[0].partner_id if o.picking_ids else False"/>
+            </t>
+            <t t-else="">
+                <t t-set="warehouse" t-value="o.sale_id.warehouse_id if o.sale_id else o.picking_type_id.warehouse_id"/>
+                <t t-set="partner" t-value="o.partner_id"/>
+            </t>
+
+            <!-- Ship From/To and BOL Number Section -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                <tr>
+                    <td style="width: 50%; vertical-align: top; padding-right: 5px;">
+                        <table style="width: 100%; border: 1px solid black; border-collapse: collapse;">
+                            <tr>
+                                <td colspan="2" style="background-color: black; color: white; text-align: center; padding: 5px; font-weight: bold;">SHIP FROM</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 3px; width: 30%;">Name</td>
+                                <td style="border: 1px solid black; padding: 3px;"><t t-out="warehouse.partner_id.name if warehouse else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 3px;">Address</td>
+                                <td style="border: 1px solid black; padding: 3px;"><t t-out="warehouse.partner_id.street if warehouse else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 3px;">City/St/Zip</td>
+                                <td style="border: 1px solid black; padding: 3px;">
+                                    <t t-if="warehouse">
+                                        <t t-out="warehouse.partner_id.city or ''"/>
+                                        <t t-if="warehouse.partner_id.state_id">, <t t-out="warehouse.partner_id.state_id.code"/></t>
+                                        <t t-if="warehouse.partner_id.zip"> <t t-out="warehouse.partner_id.zip"/></t>
+                                    </t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;" colspan="2">
+                                    <input type="checkbox" t-att-checked="'checked' if o.fob_ship_from else None" disabled="disabled"/> FOB
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="width: 50%; vertical-align: top; padding-left: 5px;">
+                        <div style="border: 1px solid black; padding: 10px; min-height: 120px;">
+                            <div style="font-weight: bold;">Bill of Lading Number: <t t-out="'0' * 10 + (o.shipment_number or '')"/></div>
+                            <div style="text-align: center; margin: 10px 0;">
+                                <t t-if="o.shipment_number">
+                                    <span t-out="'0' * 10 + o.shipment_number"
+                                          t-options="{'widget': 'barcode',
+                                                     'width': 300,
+                                                     'height': 60,
+                                                     'img_style': 'width:200px;height:40px;'}"/>
+                                </t>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Ship To and Carrier Info Section -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                <tr>
+                    <td style="width: 50%; vertical-align: top; padding-right: 5px;">
+                        <table style="width: 100%; border: 1px solid black; border-collapse: collapse;">
+                            <tr>
+                                <td colspan="2" style="background-color: black; color: white; text-align: center; padding: 5px; font-weight: bold;">SHIP TO</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 3px; width: 30%;">Name</td>
+                                <td style="border: 1px solid black; padding: 3px;"><t t-out="partner.name if partner else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 3px;">Address</td>
+                                <td style="border: 1px solid black; padding: 3px;"><t t-out="partner.street if partner else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 3px;">City/St/Zip</td>
+                                <td style="border: 1px solid black; padding: 3px;">
+                                    <t t-if="partner">
+                                        <t t-out="partner.city or ''"/>
+                                        <t t-if="partner.state_id">, <t t-out="partner.state_id.code"/></t>
+                                        <t t-if="partner.zip"> <t t-out="partner.zip"/></t>
+                                    </t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;" colspan="2">
+                                    <input type="checkbox" t-att-checked="'checked' if o.fob_ship_to else None" disabled="disabled"/> FOB
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="width: 50%; vertical-align: top; padding-left: 5px;">
+                        <div style="border: 1px solid black; padding: 10px; min-height: 120px;">
+                            <div><b>CARRIER NAME:</b> <t t-out="o.carrier_id.name if o.carrier_id else ''"/></div>
+                            <div><b>Trailer Number:</b> <t t-out="o.trailer_number or ''"/></div>
+                            <div><b>Seal Number:</b> <t t-out="o.seal_number or ''"/></div>
+                            <div><b>SCAC:</b> <t t-out="o.carrier_id.nexterus_scac if o.carrier_id else ''"/></div>
+                            <div><b>Pro Number:</b> <t t-out="o.carrier_tracking_ref or ''"/></div>
+                            <t t-if="o.carrier_tracking_ref">
+                                <div style="text-align: center; margin-top: 10px;">
+                                    <span t-out="o.carrier_tracking_ref"
+                                          t-options="{'widget': 'barcode',
+                                                     'width': 300,
+                                                     'height': 60,
+                                                     'img_style': 'width:200px;height:40px;'}"/>
+                                </div>
+                            </t>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Third Party Freight Charges Section -->
+            <t>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                    <tr>
+                        <td style="width: 50%; vertical-align: top; padding-right: 5px;">
+                            <table style="width: 100%; border: 1px solid black; border-collapse: collapse;">
+                                <tr>
+                                    <td colspan="2" style="background-color: black; color: white; text-align: center; padding: 5px; font-weight: bold;">THIRD PARTY FREIGHT CHARGES BILLED TO</td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; width: 30%;">Name</td>
+                                    <td style="border: 1px solid black; padding: 3px;"><t t-out="o.third_party_freight_partner_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px;">Address</td>
+                                    <td style="border: 1px solid black; padding: 3px;"><t t-out="o.third_party_freight_partner_id.street or ''"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px;">City/St/Zip</td>
+                                    <td style="border: 1px solid black; padding: 3px;">
+                                        <t t-out="o.third_party_freight_partner_id.city or ''"/>
+                                        <t t-if="o.third_party_freight_partner_id.state_id">, <t t-out="o.third_party_freight_partner_id.state_id.code"/></t>
+                                        <t t-if="o.third_party_freight_partner_id.zip"> <t t-out="o.third_party_freight_partner_id.zip"/></t>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="width: 50%; vertical-align: top; padding-left: 5px;">
+                            <div style="border: 1px solid black; padding: 10px; min-height: 100px;">
+                                <div><b>Freight Charge Terms:</b> (freight charges are prepaid unless marked otherwise)</div>
+                                <div style="margin: 10px 0;"><t t-out="o.freight_charge_terms or 'Prepaid'"/></div>
+                                <t t-if="o.master_bill_of_lading">
+                                    <div style="margin-top: 10px;">
+                                        <input type="checkbox" checked="checked" disabled="disabled"/> Master Bill of Lading: with attached underlying Bills of Lading
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div style="margin-top: 10px;">
+                                        <input type="checkbox" disabled="disabled"/> Master Bill of Lading: with attached underlying Bills of Lading
+                                    </div>
+                                </t>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </t>
+
+            <!-- Additional Services -->
+            <t t-if="o.requires_liftgate or o.requires_inside_delivery or o.shipping_notes">
+                <div style="margin-bottom: 10px; padding: 5px; border: 1px solid black;">
+                    <b>Additional Services:</b>
+                    <t t-if="o.requires_liftgate"> Liftgate Required</t>
+                    <t t-if="o.requires_inside_delivery"><t t-if="o.requires_liftgate">,</t> Inside Delivery</t>
+                    <t t-if="o.shipping_notes"><t t-if="o.requires_liftgate or o.requires_inside_delivery">,</t> <t t-out="o.shipping_notes"/></t>
+                </div>
+            </t>
+
+            <!-- Customer Order Information Table -->
+            <table style="width: 100%; border: 1px solid black; border-collapse: collapse; margin-bottom: 10px;">
+                <thead>
+                    <tr style="background-color: #f0f0f0;">
+                        <th colspan="5" style="border: 1px solid black; padding: 5px; text-align: center;">CUSTOMER ORDER INFORMATION</th>
+                    </tr>
+                    <tr>
+                        <th style="border: 1px solid black; padding: 5px;">CUSTOMER ORDER NUMBER</th>
+                        <th style="border: 1px solid black; padding: 5px; text-align: center;"># UNITS</th>
+                        <th style="border: 1px solid black; padding: 5px; text-align: center;"># PKGS</th>
+                        <th style="border: 1px solid black; padding: 5px; text-align: center;">WEIGHT</th>
+                        <th style="border: 1px solid black; padding: 5px;">ADDITIONAL SHIPPER INFO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-set="total_units" t-value="0"/>
+                    <t t-set="total_pkgs" t-value="0"/>
+                    <t t-set="total_weight" t-value="0.0"/>
+
+                    <t t-if="is_batch">
+                        <t t-set="all_packages_by_type" t-value="{}"/>
+                        <t t-foreach="o.picking_ids" t-as="picking">
+                            <t t-set="picking_packages" t-value="picking.get_packages_grouped_for_bol()"/>
+                            <t t-foreach="picking_packages.items()" t-as="item">
+                                <t t-set="key" t-value="item[0]"/>
+                                <t t-if="key not in all_packages_by_type">
+                                    <t t-exec="all_packages_by_type[key] = item[1]"/>
+                                </t>
+                                <t t-else="">
+                                    <t t-exec="all_packages_by_type[key]['units'] += item[1]['units']"/>
+                                    <t t-exec="all_packages_by_type[key]['pkgs'] += item[1]['pkgs']"/>
+                                    <t t-exec="all_packages_by_type[key]['weight'] += item[1]['weight']"/>
+                                </t>
+                            </t>
+                        </t>
+                        <t t-set="packages_by_type" t-value="all_packages_by_type"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="packages_by_type" t-value="o.get_packages_grouped_for_bol()"/>
+                    </t>
+
+                    <!-- Display grouped data -->
+                    <t t-foreach="packages_by_type.items()" t-as="item">
+                        <tr>
+                            <td style="border: 1px solid black; padding: 5px;"><t t-out="item[1].get('customer_po', '')"/></td>
+                            <td style="border: 1px solid black; padding: 5px; text-align: center;"><t t-out="item[1].get('units', 0)"/></td>
+                            <td style="border: 1px solid black; padding: 5px; text-align: center;"><t t-out="item[1].get('pkgs', 0)"/></td>
+                            <td style="border: 1px solid black; padding: 5px; text-align: right;"><t t-out="'%.2f' % item[1].get('weight', 0.0)"/></td>
+                            <td style="border: 1px solid black; padding: 5px;">ORDER: <t t-out="item[1].get('picking_name', '')"/></td>
+                        </tr>
+                        <t t-set="total_units" t-value="total_units + item[1].get('units', 0)"/>
+                        <t t-set="total_pkgs" t-value="total_pkgs + item[1].get('pkgs', 0)"/>
+                        <t t-set="total_weight" t-value="total_weight + item[1].get('weight', 0.0)"/>
+                    </t>
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold;">
+                        <td style="border: 1px solid black; padding: 5px;">GRAND TOTAL:</td>
+                        <td style="border: 1px solid black; padding: 5px; text-align: center;"><t t-out="total_units"/></td>
+                        <td style="border: 1px solid black; padding: 5px; text-align: center;"><t t-out="total_pkgs"/></td>
+                        <td style="border: 1px solid black; padding: 5px; text-align: right;"><t t-out="'%.2f' % total_weight"/></td>
+                        <td style="border: 1px solid black; padding: 5px;"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Carrier Information Table -->
+            <table style="width: 100%; border: 1px solid black; border-collapse: collapse; margin-bottom: 10px;">
+                <thead>
+                    <tr style="background-color: #f0f0f0;">
+                        <th colspan="9" style="border: 1px solid black; padding: 5px; text-align: center;">CARRIER INFORMATION</th>
+                    </tr>
+                    <tr>
+                        <th colspan="2" style="border: 1px solid black; padding: 5px; text-align: center;">Handling Unit</th>
+                        <th colspan="2" style="border: 1px solid black; padding: 5px; text-align: center;">Package</th>
+                        <th style="border: 1px solid black; padding: 5px; text-align: center;">Weight</th>
+                        <th style="border: 1px solid black; padding: 5px; text-align: center;">H.M.<br/>(X)</th>
+                        <th style="border: 1px solid black; padding: 5px; text-align: center; width: 30%;">Commodity Description</th>
+                        <th colspan="2" style="border: 1px solid black; padding: 5px; text-align: center;">LTL Only</th>
+                    </tr>
+                    <tr>
+                        <th style="border: 1px solid black; padding: 3px; text-align: center;">Qty</th>
+                        <th style="border: 1px solid black; padding: 3px; text-align: center;">Type</th>
+                        <th style="border: 1px solid black; padding: 3px; text-align: center;">Qty</th>
+                        <th style="border: 1px solid black; padding: 3px; text-align: center;">Type</th>
+                        <th style="border: 1px solid black; padding: 3px;"></th>
+                        <th style="border: 1px solid black; padding: 3px;"></th>
+                        <th style="border: 1px solid black; padding: 3px; font-size: 8pt;">Commodities requiring special or additional care or attention in handling or stowing must be so marked and packaged as to ensure safe transportation with ordinary care. See Section 2(e) of the NMFC Item 60</th>
+                        <th style="border: 1px solid black; padding: 3px; text-align: center;">NMFC</th>
+                        <th style="border: 1px solid black; padding: 3px; text-align: center;">Class</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-set="total_handling" t-value="0"/>
+                    <t t-set="total_packages" t-value="0"/>
+                    <t t-set="total_carrier_weight" t-value="0.0"/>
+
+                    <t t-if="is_batch">
+                        <t t-foreach="o.picking_ids" t-as="picking">
+                            <t t-foreach="picking.move_line_ids.mapped('result_package_id')" t-as="package">
+                                <tr>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">1</td>
+                                    <td style="border: 1px solid black; padding: 3px;"><t t-out="package.package_type_id.name if package.package_type_id else 'PACKAGE'"/></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.span_package_qty or 0"/></td>
+                                    <td style="border: 1px solid black; padding: 3px;"><t t-out="package.span_package_type_id.code if package.span_package_type_id else 'PKG'"/></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: right;"><t t-out="'%.2f' % (package.shipping_weight or 0.0)"/></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-if="package.is_hazmat">X</t></td>
+                                    <td style="border: 1px solid black; padding: 3px;"><t t-out="package.commodity_description_id.name if package.commodity_description_id else ''"/></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.nmfc_code or ''"/></td>
+                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.nmfc_class or ''"/></td>
+                                </tr>
+                                <t t-set="total_handling" t-value="total_handling + 1"/>
+                                <t t-set="total_packages" t-value="total_packages + (package.span_package_qty or 0)"/>
+                                <t t-set="total_carrier_weight" t-value="total_carrier_weight + (package.shipping_weight or 0.0)"/>
+                            </t>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <t t-foreach="o.move_line_ids.mapped('result_package_id')" t-as="package">
+                            <tr>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;">1</td>
+                                <td style="border: 1px solid black; padding: 3px;"><t t-out="package.package_type_id.name if package.package_type_id else 'PACKAGE'"/></td>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.span_package_qty or 0"/></td>
+                                <td style="border: 1px solid black; padding: 3px;"><t t-out="package.span_package_type_id.code if package.span_package_type_id else 'PKG'"/></td>
+                                <td style="border: 1px solid black; padding: 3px; text-align: right;"><t t-out="'%.2f' % (package.shipping_weight or 0.0)"/></td>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-if="package.is_hazmat">X</t></td>
+                                <td style="border: 1px solid black; padding: 3px;"><t t-out="package.commodity_description_id.name if package.commodity_description_id else ''"/></td>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.nmfc_code or ''"/></td>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.nmfc_class or ''"/></td>
+                            </tr>
+                            <t t-set="total_handling" t-value="total_handling + 1"/>
+                            <t t-set="total_packages" t-value="total_packages + (package.span_package_qty or 0)"/>
+                            <t t-set="total_carrier_weight" t-value="total_carrier_weight + (package.shipping_weight or 0.0)"/>
+                        </t>
+                    </t>
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold;">
+                        <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="total_handling"/></td>
+                        <td style="border: 1px solid black; padding: 3px;"></td>
+                        <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="total_packages"/></td>
+                        <td style="border: 1px solid black; padding: 3px;"></td>
+                        <td style="border: 1px solid black; padding: 3px; text-align: right;"><t t-out="'%.2f' % total_carrier_weight"/></td>
+                        <td colspan="4" style="border: 1px solid black; padding: 3px;"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Legal Text -->
+            <div style="font-size: 8pt; margin-bottom: 10px; padding: 10px; border: 1px solid black;">
+                <p style="margin: 5px 0;">Where the rate is dependent on value, shippers are required to state specifically in writing the agreed or declared value of the property as follows:<br/>
+                "The agreed or declared value of the property is specifically stated by the shipper to be not exceeding ____________ per ______________."</p>
+
+                <p style="margin: 5px 0;">COD Amount: $ _______________<br/>
+                Fee Terms: Collect: ___ Prepaid: ___<br/>
+                Customer Check Acceptable: ____</p>
+
+                <p style="margin: 5px 0;"><b>NOTE Liability Limitation for loss or damage in this shipment may be applicable. See 49 U.S.C -- 14706(c)(1)(A) and (B).</b></p>
+
+                <p style="margin: 5px 0;">RECEIVED, subject to individually determined rates or contracts that have been agreed upon in writing by the carrier and shipper, if applicable, otherwise to the rates, classifications, and rules that have been established by the carrier and are considered by the carrier and are available to the shipper, on request, and to all applicable state and federal regulations.</p>
+
+                <p style="margin: 5px 0;">The carrier shall not make delivery of this shipment without payment of freight and other lawful charges.</p>
+            </div>
+
+            <!-- Signature Section -->
+            <table style="width: 100%; margin-top: 20px;">
+                <tr>
+                    <td style="width: 50%; padding-right: 10px;">
+                        <div style="border-bottom: 2px solid black; padding-bottom: 5px; margin-bottom: 5px;">
+                            <b>SHIPPER SIGNATURE / DATE</b>
+                        </div>
+                        <t t-if="user.sign_signature">
+                            <div style="height: 60px;">
+                                <img t-att-src="'data:image/png;base64,' + user.sign_signature.decode('utf-8')"
+                                     style="max-height: 60px;"/>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div style="height: 60px;">
+                                _____________________________
+                            </div>
+                        </t>
+                    </td>
+                    <td style="width: 50%; padding-left: 10px;">
+                        <div style="border-bottom: 2px solid black; padding-bottom: 5px; margin-bottom: 5px;">
+                            <b>CARRIER SIGNATURE / PICKUP DATE</b>
+                        </div>
+                        <div style="height: 60px;">
+                            _____________________________
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Trailer Loading Info -->
+            <div style="margin-top: 20px; font-size: 9pt;">
+                <table style="width: 50%;">
+                    <tr>
+                        <td>Trailer Freight Counted:</td>
+                        <td>
+                            <input type="checkbox" disabled="disabled"/> By Shipper
+                            <input type="checkbox" disabled="disabled"/> By Driver
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Loaded:</td>
+                        <td>
+                            <input type="checkbox" disabled="disabled"/> By Shipper
+                            <input type="checkbox" disabled="disabled"/> By Driver/pallets said to contain
+                            <input type="checkbox" disabled="disabled"/> By Driver/Pieces
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </template>
+</odoo>

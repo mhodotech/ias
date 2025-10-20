@@ -113,6 +113,9 @@
                                 <button class="btn btn-primary quick-action-btn" t-on-click="printContainerLabel">
                                     <i class="fa fa-tag"/> Container Label
                                 </button>
+                                <button class="btn btn-primary quick-action-btn" t-on-click="printBillOfLading">
+                                    <i class="fa fa-file-text"/> Bill of Lading
+                                </button>
                                 <button class="btn btn-info quick-action-btn" t-on-click="printReports">
                                     <i class="fa fa-file-alt"/> All Reports
                                 </button>

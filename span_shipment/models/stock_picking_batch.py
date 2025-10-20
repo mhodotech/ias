@@ -59,6 +59,85 @@ class StockPickingBatch(models.Model):
         help='Special instructions for shipping'
     )
 
+    shipment_number = fields.Char(
+        string='Shipment #',
+        compute='_compute_shipment_number',
+        store=True,
+        readonly=False
+    )
+    third_party_freight_partner_id = fields.Many2one(
+        'res.partner',
+        string='Third Party Freight Charges Billed To',
+        compute='_compute_third_party_freight_partner',
+        store=True,
+        readonly=False
+    )
+    trailer_number = fields.Char(string='Trailer Number')
+    seal_number = fields.Char(string='Seal Number')
+    freight_charge_terms = fields.Char(
+        string='Freight Charge Terms',
+        default='Prepaid'
+    )
+    master_bill_of_lading = fields.Boolean(
+        string='Master Bill of Lading',
+        default=False
+    )
+
+    fob_ship_from = fields.Boolean(string='FOB Ship From', default=False)
+    fob_ship_to = fields.Boolean(string='FOB Ship To', default=False)
+
+
+    @api.depends('picking_ids.shipment_number')
+    def _compute_shipment_number(self):
+        for batch in self:
+            if batch.picking_ids:
+                batch.shipment_number = batch.picking_ids[0].shipment_number
+
+    @api.depends('picking_ids.partner_id')
+    def _compute_third_party_freight_partner(self):
+        for batch in self:
+            partner = self.env['res.partner'].search([
+                ('third_party_freight_billing', '=', True)
+            ], limit=1)
+            if partner and not batch.third_party_freight_partner_id:
+                batch.third_party_freight_partner_id = partner
+
+    def _get_packages_by_type(self):
+        """Group packages by packaging type (handling unit) for Customer Order Information table"""
+        package_groups = {}
+
+        # Get all packages from all pickings in the batch
+        all_packages = self.env['stock.quant.package']
+        for picking in self.picking_ids:
+            all_packages |= picking.move_line_ids.mapped('result_package_id')
+
+        # Group by packaging type (handling unit type like PALLET, CARTON)
+        for package in all_packages:
+            pkg_type = package.package_type_id.name if package.package_type_id else 'PACKAGE'
+            if pkg_type not in package_groups:
+                package_groups[pkg_type] = {
+                    'units': 0,  # Count of handling units (packages)
+                    'pkgs': 0,  # Total span_package_qty
+                    'weight': 0.0,
+                    'customer_po': '',
+                    'picking_name': ''
+                }
+
+            # Find the picking for this package
+            picking = self.picking_ids.filtered(lambda p: package in p.move_line_ids.mapped('result_package_id'))
+            if picking:
+                picking = picking[0]
+                if not package_groups[pkg_type]['customer_po']:
+                    package_groups[pkg_type][
+                        'customer_po'] = picking.sale_id.gp_cstponbr or picking.sale_id.client_order_ref or ''
+                    package_groups[pkg_type]['picking_name'] = picking.name
+
+            package_groups[pkg_type]['units'] += 1  # One handling unit
+            package_groups[pkg_type]['pkgs'] += package.span_package_qty or 0
+            package_groups[pkg_type]['weight'] += package.shipping_weight or 0.0
+
+        return list(package_groups.values())
+
     @api.depends('picking_ids.move_line_ids.result_package_id')
     def _compute_package_ids(self):
         for batch in self:

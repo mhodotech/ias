@@ -17,10 +17,16 @@
                         string="Get Rates"
                         type="object"
                         class="btn-primary"
-                        invisible="state in ['done', 'cancel']"/>
+                        invisible="state in ['cancel']"/>
 
                 <button name="%(span_shipment.action_report_container_label_picking)d"
                         string="Print Container Label"
+                        type="action"
+                        class="btn-secondary"
+                />
+
+                <button name="%(span_shipment.action_report_bill_of_lading_picking)d"
+                        string="Print Bill of Lading"
                         type="action"
                         class="btn-secondary"
                 />
@@ -45,6 +51,25 @@
                     <field name="requires_inside_delivery"/>
                     <field name="shipping_notes" colspan="4"/>
                 </group>
+            </xpath>
+
+            <xpath expr="//page[@name='operations']" position="after">
+                <page string="Bill of Lading" name="bill_of_lading">
+                    <group>
+                        <group string="Shipment Information">
+                            <field name="shipment_number" readonly="1"/>
+                            <field name="third_party_freight_partner_id"/>
+                            <field name="freight_charge_terms"/>
+                            <field name="master_bill_of_lading"/>
+                            <field name="fob_ship_from"/>
+                            <field name="fob_ship_to"/>
+                        </group>
+                        <group string="Carrier Details">
+                            <field name="trailer_number"/>
+                            <field name="seal_number"/>
+                        </group>
+                    </group>
+                </page>
             </xpath>
         </field>
     </record>

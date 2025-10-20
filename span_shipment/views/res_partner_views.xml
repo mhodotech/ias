@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_span_shipment" model="ir.ui.view">
+        <field name="name">res.partner.form.span.shipment</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='sales_purchases']//group[@name='sale']" position="inside">
+                <field name="third_party_freight_billing"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

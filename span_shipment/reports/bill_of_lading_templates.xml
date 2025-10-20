@@ -344,8 +344,7 @@
                             <t t-set="total_carrier_weight" t-value="total_carrier_weight + (package.shipping_weight or 0.0)"/>
                         </t>
                     </t>
-                </tbody>
-                <tfoot>
+
                     <tr style="font-weight: bold;">
                         <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="total_handling"/></td>
                         <td style="border: 1px solid black; padding: 3px;"></td>
@@ -354,29 +353,53 @@
                         <td style="border: 1px solid black; padding: 3px; text-align: right;"><t t-out="'%.2f' % total_carrier_weight"/></td>
                         <td colspan="4" style="border: 1px solid black; padding: 3px;"></td>
                     </tr>
-                </tfoot>
+                </tbody>
             </table>
 
-            <!-- Legal Text -->
-            <div style="font-size: 8pt; margin-bottom: 10px; padding: 10px; border: 1px solid black;">
-                <p style="margin: 5px 0;">Where the rate is dependent on value, shippers are required to state specifically in writing the agreed or declared value of the property as follows:<br/>
-                "The agreed or declared value of the property is specifically stated by the shipper to be not exceeding ____________ per ______________."</p>
+            <!-- Legal Text and COD Section (Two Columns) -->
+            <table style="width: 100%; font-size: 8pt; margin-top: 10px; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 50%; vertical-align: top; padding: 10px; border: 1px solid black;">
+                        <p style="margin: 5px 0;">Where the rate is dependent on value, shippers are required to state specifically in writing the agreed or declared value of the property as follows:</p>
+                        <p style="margin: 5px 0;">"The agreed or declared value of the property is specifically stated by the shipper to be not exceeding</p>
+                        <p style="margin: 5px 0;">____________</p>
+                        <p style="margin: 5px 0;">per ______________."</p>
+                    </td>
+                    <td style="width: 50%; vertical-align: top; border: 1px solid black; border-left: none; padding: 10px;">
+                        <p style="margin: 2px 0;"><b>COD Amount: $ _______________</b></p>
+                        <p style="margin: 2px 0;"><b>Fee Terms:</b></p>
+                        <p style="margin: 2px 0; margin-left: 20px;">Collect: ___</p>
+                        <p style="margin: 2px 0; margin-left: 20px;">Prepaid: ___</p>
+                        <p style="margin: 2px 0;"><b>Customer Check Acceptable: ____</b></p>
+                    </td>
+                </tr>
+            </table>
 
-                <p style="margin: 5px 0;">COD Amount: $ _______________<br/>
-                Fee Terms: Collect: ___ Prepaid: ___<br/>
-                Customer Check Acceptable: ____</p>
-
+            <!-- NOTE Section (Full Width) -->
+            <div style="font-size: 8pt; margin-top: 0; padding: 10px; border: 1px solid black; border-top: none;">
                 <p style="margin: 5px 0;"><b>NOTE Liability Limitation for loss or damage in this shipment may be applicable. See 49 U.S.C -- 14706(c)(1)(A) and (B).</b></p>
-
-                <p style="margin: 5px 0;">RECEIVED, subject to individually determined rates or contracts that have been agreed upon in writing by the carrier and shipper, if applicable, otherwise to the rates, classifications, and rules that have been established by the carrier and are considered by the carrier and are available to the shipper, on request, and to all applicable state and federal regulations.</p>
-
-                <p style="margin: 5px 0;">The carrier shall not make delivery of this shipment without payment of freight and other lawful charges.</p>
             </div>
 
-            <!-- Signature Section -->
-            <table style="width: 100%; margin-top: 20px;">
+            <!-- Received Section (Two Columns) -->
+            <table style="width: 100%; font-size: 8pt; margin-top: 0; border-collapse: collapse;">
                 <tr>
-                    <td style="width: 50%; padding-right: 10px;">
+                    <td style="width: 50%; vertical-align: top; padding: 10px; border: 1px solid black; border-top: none;">
+                        <p style="margin: 5px 0;">RECEIVED, subject to individually determined rates or contracts that have been agreed upon in writing by the carrier and shipper, if applicable, otherwise to the rates, classifications, and rules that have been established by the carrier and are considered by the carrier and are available to the shipper, on request, and to all applicable state and federal regulations.</p>
+                    </td>
+                    <td style="width: 50%; vertical-align: top; padding: 10px; border: 1px solid black; border-top: none; border-left: none;">
+                        <p style="margin: 5px 0;">The carrier shall not make delivery of this shipment without payment of freight and other lawful charges.</p>
+                        <div style="margin-top: 30px; border-bottom: 1px solid black; padding-bottom: 5px;">
+                            _______________________________________________
+                        </div>
+                        <p style="margin: 5px 0; text-align: right;"><b>Shipper Signature</b></p>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Signature Section (Three Columns) -->
+            <table style="width: 100%; font-size: 9pt; margin-top: 0; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 33%; vertical-align: top; padding: 10px; border: 1px solid black; border-top: none;">
                         <div style="border-bottom: 2px solid black; padding-bottom: 5px; margin-bottom: 5px;">
                             <b>SHIPPER SIGNATURE / DATE</b>
                         </div>
@@ -392,37 +415,30 @@
                             </div>
                         </t>
                     </td>
-                    <td style="width: 50%; padding-left: 10px;">
+                    <td style="width: 33%; vertical-align: top; padding: 10px; border: 1px solid black; border-top: none; border-left: none;">
+                        <div style="margin-bottom: 5px;">
+                            <p style="margin: 2px 0;"><b>Trailer</b></p>
+                            <p style="margin: 2px 0;"><b>Loaded:</b></p>
+                            <input type="checkbox" disabled="disabled"/> By Shipper
+                            <input type="checkbox" disabled="disabled"/> By Driver
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <p style="margin: 2px 0;"><b>Freight Counted:</b></p>
+                            <input type="checkbox" disabled="disabled"/> By Shipper
+                            <input type="checkbox" disabled="disabled"/> By Driver/pallets said to contain
+                            <input type="checkbox" disabled="disabled"/> By Driver/Pieces
+                        </div>
+                    </td>
+                    <td style="width: 34%; vertical-align: top; padding: 10px; border: 1px solid black; border-top: none; border-left: none;">
                         <div style="border-bottom: 2px solid black; padding-bottom: 5px; margin-bottom: 5px;">
                             <b>CARRIER SIGNATURE / PICKUP DATE</b>
                         </div>
                         <div style="height: 60px;">
-                            _____________________________
+                            _____________________________________
                         </div>
                     </td>
                 </tr>
             </table>
-
-            <!-- Trailer Loading Info -->
-            <div style="margin-top: 20px; font-size: 9pt;">
-                <table style="width: 50%;">
-                    <tr>
-                        <td>Trailer Freight Counted:</td>
-                        <td>
-                            <input type="checkbox" disabled="disabled"/> By Shipper
-                            <input type="checkbox" disabled="disabled"/> By Driver
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Loaded:</td>
-                        <td>
-                            <input type="checkbox" disabled="disabled"/> By Shipper
-                            <input type="checkbox" disabled="disabled"/> By Driver/pallets said to contain
-                            <input type="checkbox" disabled="disabled"/> By Driver/Pieces
-                        </td>
-                    </tr>
-                </table>
-            </div>
         </div>
     </template>
 </odoo>

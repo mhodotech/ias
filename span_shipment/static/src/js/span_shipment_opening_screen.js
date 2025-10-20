@@ -16,6 +16,9 @@ export class SpanShipmentOpeningScreen extends Component {
             selectedPickingId: false,
             selectedPickingName: "",
             searchQuery: "",
+            searchType: "picking", // Add this - default to picking
+            selectedBatchId: false, // Add this
+            selectedBatchName: "", // Add this
         });
 
         this.pickingSearchInput = useRef("pickingSearchInput");
@@ -24,8 +27,7 @@ export class SpanShipmentOpeningScreen extends Component {
     async searchPicking() {
         const searchQuery = this.pickingSearchInput.el?.value?.trim();
         if (!searchQuery) {
-            this.state.selectedPickingId = false;
-            this.state.selectedPickingName = "";
+            this.resetSelection();
             this.notification.add("Please enter an order number", {
                 type: "warning",
                 title: "Input Required",
@@ -34,35 +36,78 @@ export class SpanShipmentOpeningScreen extends Component {
         }
 
         try {
-            // Search for exact or partial match
-            const pickings = await this.orm.searchRead(
-                "stock.picking",
-                [["name", "ilike", searchQuery]],
-                ["id", "name", "partner_id", "state"],
-                { limit: 1 }
-            );
+            if (this.state.searchType === "picking") {
+                // Search for picking
+                const pickings = await this.orm.searchRead(
+                    "stock.picking",
+                    [["name", "ilike", searchQuery]],
+                    ["id", "name", "partner_id", "state"],
+                    { limit: 1 }
+                );
 
-            if (pickings && pickings.length > 0) {
-                this.state.selectedPickingId = pickings[0].id;
-                this.state.selectedPickingName = pickings[0].name;
-                this.notification.add(`Selected: ${pickings[0].name}`, {
-                    type: "success",
-                    title: "Order Found",
-                });
+                if (pickings && pickings.length > 0) {
+                    this.state.selectedPickingId = pickings[0].id;
+                    this.state.selectedPickingName = pickings[0].name;
+                    this.state.selectedBatchId = false;
+                    this.state.selectedBatchName = "";
+                    this.notification.add(`Selected: ${pickings[0].name}`, {
+                        type: "success",
+                        title: "Order Found",
+                    });
+                } else {
+                    this.notification.add(`No picking order found matching "${searchQuery}"`, {
+                        type: "warning",
+                        title: "Not Found",
+                    });
+                    this.resetSelection();
+                }
             } else {
-                this.notification.add(`No order found matching "${searchQuery}"`, {
-                    type: "warning",
-                    title: "Not Found",
-                });
-                this.state.selectedPickingId = false;
-                this.state.selectedPickingName = "";
+                // Search for batch
+                const batches = await this.orm.searchRead(
+                    "stock.picking.batch",
+                    [["name", "ilike", searchQuery]],
+                    ["id", "name", "state"],
+                    { limit: 1 }
+                );
+
+                if (batches && batches.length > 0) {
+                    this.state.selectedBatchId = batches[0].id;
+                    this.state.selectedBatchName = batches[0].name;
+                    this.state.selectedPickingId = false;
+                    this.state.selectedPickingName = "";
+                    this.notification.add(`Selected: ${batches[0].name}`, {
+                        type: "success",
+                        title: "Batch Found",
+                    });
+                } else {
+                    this.notification.add(`No batch found matching "${searchQuery}"`, {
+                        type: "warning",
+                        title: "Not Found",
+                    });
+                    this.resetSelection();
+                }
             }
         } catch (error) {
-            console.error("Error searching picking:", error);
+            console.error("Error searching:", error);
             this.notification.add("Error searching for order", {
                 type: "danger",
                 title: "Search Error",
             });
+        }
+    }
+
+    resetSelection() {
+        this.state.selectedPickingId = false;
+        this.state.selectedPickingName = "";
+        this.state.selectedBatchId = false;
+        this.state.selectedBatchName = "";
+    }
+
+    toggleSearchType(type) {
+        this.state.searchType = type;
+        this.resetSelection();
+        if (this.pickingSearchInput.el) {
+            this.pickingSearchInput.el.value = "";
         }
     }
 
@@ -151,123 +196,99 @@ export class SpanShipmentOpeningScreen extends Component {
     }
 
     async printReports() {
-        if (!this.state.selectedPickingId) {
-            this.notification.add("Please search and select an order first", {
+        if (!this.state.selectedPickingId && !this.state.selectedBatchId) {
+            this.notification.add("Please search and select an order or batch first", {
                 type: "warning",
-                title: "No Order Selected",
+                title: "No Selection",
             });
             return;
         }
 
-        // Open report selection for the selected picking
+        if (this.state.selectedBatchId) {
+            // Open batch form for all reports
+            await this.action.doAction({
+                type: "ir.actions.act_window",
+                name: "Print Shipping Reports - Batch",
+                res_model: "stock.picking.batch",
+                res_id: this.state.selectedBatchId,
+                view_mode: "form",
+                views: [[false, "form"]],
+                target: "current",
+                context: {
+                    print_report_mode: true,
+                },
+            });
+        } else {
+            // Open picking form for all reports
+            await this.action.doAction({
+                type: "ir.actions.act_window",
+                name: "Print Shipping Reports",
+                res_model: "stock.picking",
+                res_id: this.state.selectedPickingId,
+                view_mode: "form",
+                views: [[false, "form"]],
+                target: "current",
+                context: {
+                    print_report_mode: true,
+                },
+            });
+        }
+    }
+
+    async printContainerLabel() {
+        if (!this.state.selectedPickingId && !this.state.selectedBatchId) {
+            this.notification.add("Please search and select an order or batch first", {
+                type: "warning",
+                title: "No Selection",
+            });
+            return;
+        }
+
+        const reportName = this.state.selectedBatchId
+            ? "span_shipment.report_container_label_batch"
+            : "span_shipment.report_container_label_picking";
+
+        const recordId = this.state.selectedBatchId || this.state.selectedPickingId;
+        const modelName = this.state.selectedBatchId ? "stock.picking.batch" : "stock.picking";
+
         await this.action.doAction({
-            type: "ir.actions.act_window",
-            name: "Print Shipping Reports",
-            res_model: "stock.picking",
-            res_id: this.state.selectedPickingId,
-            view_mode: "form",
-            views: [[false, "form"]],
-            target: "current",
+            type: "ir.actions.report",
+            report_name: reportName,
+            report_type: "qweb-pdf",
+            data: null,
             context: {
-                print_report_mode: true,
+                active_ids: [recordId],
+                active_model: modelName,
             },
         });
     }
 
-    async printContainerLabel() {
-        if (!this.state.selectedPickingId) {
-            this.notification.add("Please search and select an order first", {
-                type: "warning",
-                title: "No Order Selected",
-            });
-            return;
-        }
-
-        // Print container label report - using correct report action
-        try {
-            const action = await this.orm.call(
-                "ir.actions.report",
-                "get_action",
-                [this.state.selectedPickingId],
-                { report_name: "span_shipment.report_container_label_picking" }
-            );
-
-            if (action) {
-                await this.action.doAction(action);
-            } else {
-                // Fallback to direct report call
-                await this.action.doAction({
-                    type: "ir.actions.report",
-                    report_name: "span_shipment.report_container_label_picking",
-                    report_type: "qweb-pdf",
-                    data: null,
-                    context: {
-                        active_ids: [this.state.selectedPickingId],
-                        active_model: "stock.picking",
-                    },
-                });
-            }
-        } catch (error) {
-            // Final fallback
-            await this.action.doAction({
-                type: "ir.actions.report",
-                report_name: "span_shipment.report_container_label_picking",
-                report_type: "qweb-pdf",
-                data: null,
-                context: {
-                    active_ids: [this.state.selectedPickingId],
-                    active_model: "stock.picking",
-                },
-            });
-        }
-    }
-
     async printBillOfLading() {
-        if (!this.state.selectedPickingId) {
-            this.notification.add("Please search and select an order first", {
+        if (!this.state.selectedPickingId && !this.state.selectedBatchId) {
+            this.notification.add("Please search and select an order or batch first", {
                 type: "warning",
-                title: "No Order Selected",
+                title: "No Selection",
             });
             return;
         }
 
-        // Print bill of lading report
-        try {
-            const action = await this.orm.call(
-                "ir.actions.report",
-                "get_action",
-                [this.state.selectedPickingId],
-                { report_name: "span_shipment.report_bill_of_lading_picking" }
-            );
+        const reportName = this.state.selectedBatchId
+            ? "span_shipment.report_bill_of_lading_batch"
+            : "span_shipment.report_bill_of_lading_picking";
 
-            if (action) {
-                await this.action.doAction(action);
-            } else {
-                // Fallback to direct report call
-                await this.action.doAction({
-                    type: "ir.actions.report",
-                    report_name: "span_shipment.report_bill_of_lading_picking",
-                    report_type: "qweb-pdf",
-                    data: null,
-                    context: {
-                        active_ids: [this.state.selectedPickingId],
-                        active_model: "stock.picking",
-                    },
-                });
-            }
-        } catch (error) {
-            // Final fallback
-            await this.action.doAction({
-                type: "ir.actions.report",
-                report_name: "span_shipment.report_bill_of_lading_picking",
-                report_type: "qweb-pdf",
-                data: null,
-                context: {
-                    active_ids: [this.state.selectedPickingId],
-                    active_model: "stock.picking",
-                },
-            });
-        }
+        const recordId = this.state.selectedBatchId || this.state.selectedPickingId;
+        const modelName = this.state.selectedBatchId ? "stock.picking.batch" : "stock.picking";
+
+        await this.action.doAction({
+            type: "ir.actions.report",
+            report_name: reportName,
+            report_type: "qweb-pdf",
+            data: null,
+            context: {
+                active_ids: [recordId],
+                active_model: modelName,
+            },
+        });
     }
 
     async closeCarriers() {

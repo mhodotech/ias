@@ -323,3 +323,29 @@ class StockPickingBatch(models.Model):
             'view_mode': 'form',
             'target': 'new',
         }
+
+    def write(self, vals):
+        """Override write to propagate carrier and tracking ref to pickings"""
+        res = super(StockPickingBatch, self).write(vals)
+
+        # Check if carrier_id or carrier_tracking_ref is being updated
+        if 'carrier_id' in vals or 'carrier_tracking_ref' in vals:
+            for batch in self:
+                picking_vals = {}
+
+                # Only update if the field was changed in batch
+                if 'carrier_id' in vals:
+                    picking_vals['carrier_id'] = vals['carrier_id']
+                if 'carrier_tracking_ref' in vals:
+                    picking_vals['carrier_tracking_ref'] = vals['carrier_tracking_ref']
+
+                if picking_vals:
+                    # Update only pickings where these fields are empty
+                    pickings_to_update = batch.picking_ids.filtered(
+                        lambda p: (not p.carrier_id if 'carrier_id' in picking_vals else True) and
+                                  (not p.carrier_tracking_ref if 'carrier_tracking_ref' in picking_vals else True)
+                    )
+                    if pickings_to_update:
+                        pickings_to_update.write(picking_vals)
+
+        return res

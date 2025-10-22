@@ -349,3 +349,77 @@ class StockPickingBatch(models.Model):
                         pickings_to_update.write(picking_vals)
 
         return res
+
+    def get_packages_grouped_for_bol(self):
+        """Helper method to get packages grouped by type for BOL - returns dict like picking"""
+        self.ensure_one()
+        packages_by_type = {}
+
+        # Get all unique packages from all pickings
+        all_packages = self.package_ids  # This already gives unique packages
+
+        for package in all_packages:
+            # Find ALL pickings this package belongs to (not just first)
+            related_pickings = self.picking_ids.filtered(
+                lambda p: package in p.move_line_ids.mapped('result_package_id')
+            )
+
+            # Collect customer POs and picking names from all related pickings
+            customer_pos = []
+            picking_names = []
+
+            for picking in related_pickings:
+                # Get customer PO using the same logic as picking
+                if picking.sale_id:
+                    # Use gp_cstponbr first, then client_order_ref as fallback
+                    if hasattr(picking.sale_id, 'gp_cstponbr') and picking.sale_id.gp_cstponbr:
+                        customer_po = picking.sale_id.gp_cstponbr
+                    else:
+                        customer_po = picking.sale_id.client_order_ref or ''
+                else:
+                    customer_po = picking.origin or ''
+
+                if customer_po and customer_po not in customer_pos:
+                    customer_pos.append(customer_po)
+
+                if picking.name not in picking_names:
+                    picking_names.append(picking.name)
+
+            # Join multiple POs and picking names with comma
+            customer_po_str = ', '.join(customer_pos) if customer_pos else ''
+            picking_names_str = ', '.join(picking_names) if picking_names else ''
+
+            pkg_type = package.package_type_id.name if package.package_type_id else 'PACKAGE'
+
+            if pkg_type not in packages_by_type:
+                packages_by_type[pkg_type] = {
+                    'units': 0,
+                    'pkgs': 0,
+                    'weight': 0.0,
+                    'customer_po': customer_po_str,
+                    'picking_name': picking_names_str
+                }
+            else:
+                # If we already have this package type, we might need to append POs
+                # This handles case where multiple packages of same type have different POs
+                existing_pos = packages_by_type[pkg_type]['customer_po'].split(', ') if packages_by_type[pkg_type][
+                    'customer_po'] else []
+                existing_pickings = packages_by_type[pkg_type]['picking_name'].split(', ') if \
+                packages_by_type[pkg_type]['picking_name'] else []
+
+                for po in customer_pos:
+                    if po and po not in existing_pos:
+                        existing_pos.append(po)
+
+                for name in picking_names:
+                    if name and name not in existing_pickings:
+                        existing_pickings.append(name)
+
+                packages_by_type[pkg_type]['customer_po'] = ', '.join(existing_pos)
+                packages_by_type[pkg_type]['picking_name'] = ', '.join(existing_pickings)
+
+            packages_by_type[pkg_type]['units'] += 1
+            packages_by_type[pkg_type]['pkgs'] += package.span_package_qty or 0
+            packages_by_type[pkg_type]['weight'] += package.shipping_weight or 0.0
+
+        return packages_by_type

@@ -291,7 +291,7 @@ class NexterusRequest:
                 params=params,
                 data=urlencode(form_data),
                 headers=headers,
-                timeout=480
+                timeout=960
             )
 
             if response.status_code != 200:

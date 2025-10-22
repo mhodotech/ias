@@ -229,22 +229,7 @@
                     <t t-set="total_weight" t-value="0.0"/>
 
                     <t t-if="is_batch">
-                        <t t-set="all_packages_by_type" t-value="{}"/>
-                        <t t-foreach="o.picking_ids" t-as="picking">
-                            <t t-set="picking_packages" t-value="picking.get_packages_grouped_for_bol()"/>
-                            <t t-foreach="picking_packages.items()" t-as="item">
-                                <t t-set="key" t-value="item[0]"/>
-                                <t t-if="key not in all_packages_by_type">
-                                    <t t-exec="all_packages_by_type[key] = item[1]"/>
-                                </t>
-                                <t t-else="">
-                                    <t t-exec="all_packages_by_type[key]['units'] += item[1]['units']"/>
-                                    <t t-exec="all_packages_by_type[key]['pkgs'] += item[1]['pkgs']"/>
-                                    <t t-exec="all_packages_by_type[key]['weight'] += item[1]['weight']"/>
-                                </t>
-                            </t>
-                        </t>
-                        <t t-set="packages_by_type" t-value="all_packages_by_type"/>
+                        <t t-set="packages_by_type" t-value="o.get_packages_grouped_for_bol()"/>
                     </t>
                     <t t-else="">
                         <t t-set="packages_by_type" t-value="o.get_packages_grouped_for_bol()"/>
@@ -307,23 +292,23 @@
                     <t t-set="total_carrier_weight" t-value="0.0"/>
 
                     <t t-if="is_batch">
-                        <t t-foreach="o.picking_ids" t-as="picking">
-                            <t t-foreach="picking.move_line_ids.mapped('result_package_id')" t-as="package">
-                                <tr>
-                                    <td style="border: 1px solid black; padding: 3px; text-align: center;">1</td>
-                                    <td style="border: 1px solid black; padding: 3px;"><t t-out="package.package_type_id.name if package.package_type_id else 'PACKAGE'"/></td>
-                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.span_package_qty or 0"/></td>
-                                    <td style="border: 1px solid black; padding: 3px;"><t t-out="package.span_package_type_id.code if package.span_package_type_id else 'PKG'"/></td>
-                                    <td style="border: 1px solid black; padding: 3px; text-align: right;"><t t-out="'%.2f' % (package.shipping_weight or 0.0)"/></td>
-                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-if="package.is_hazmat">X</t></td>
-                                    <td style="border: 1px solid black; padding: 3px;"><t t-out="package.commodity_description_id.name if package.commodity_description_id else ''"/></td>
-                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.nmfc_code or ''"/></td>
-                                    <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.nmfc_class or ''"/></td>
-                                </tr>
-                                <t t-set="total_handling" t-value="total_handling + 1"/>
-                                <t t-set="total_packages" t-value="total_packages + (package.span_package_qty or 0)"/>
-                                <t t-set="total_carrier_weight" t-value="total_carrier_weight + (package.shipping_weight or 0.0)"/>
-                            </t>
+                        <!-- Get unique packages across all pickings to avoid duplicates -->
+                        <t t-set="all_packages" t-value="o.package_ids"/>
+                        <t t-foreach="all_packages" t-as="package">
+                            <tr>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;">1</td>
+                                <td style="border: 1px solid black; padding: 3px;"><t t-out="package.package_type_id.name if package.package_type_id else 'PACKAGE'"/></td>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.span_package_qty or 0"/></td>
+                                <td style="border: 1px solid black; padding: 3px;"><t t-out="package.span_package_type_id.code if package.span_package_type_id else 'PKG'"/></td>
+                                <td style="border: 1px solid black; padding: 3px; text-align: right;"><t t-out="'%.2f' % (package.shipping_weight or 0.0)"/></td>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-if="package.is_hazmat">X</t></td>
+                                <td style="border: 1px solid black; padding: 3px;"><t t-out="package.commodity_description_id.name if package.commodity_description_id else ''"/></td>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.nmfc_code or ''"/></td>
+                                <td style="border: 1px solid black; padding: 3px; text-align: center;"><t t-out="package.nmfc_class or ''"/></td>
+                            </tr>
+                            <t t-set="total_handling" t-value="total_handling + 1"/>
+                            <t t-set="total_packages" t-value="total_packages + (package.span_package_qty or 0)"/>
+                            <t t-set="total_carrier_weight" t-value="total_carrier_weight + (package.shipping_weight or 0.0)"/>
                         </t>
                     </t>
                     <t t-else="">

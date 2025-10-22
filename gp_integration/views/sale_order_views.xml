@@ -9,11 +9,11 @@
                 <page string="GP Integration" name="gp_integration">
                     <group>
                         <group string="GP References">
-                            <field name="gp_sopnumbe" readonly="1"/>
-                            <field name="gp_custnmbr" readonly="1"/>
-                            <field name="gp_cstponbr" readonly="1"/>
-                            <field name="gp_pckslpno" readonly="1"/>
-                            <field name="gp_bachnumb" readonly="1"/>
+                            <field name="gp_sopnumbe" readonly="0"/>
+                            <field name="gp_custnmbr" readonly="0"/>
+                            <field name="gp_cstponbr" readonly="0"/>
+                            <field name="gp_pckslpno" readonly="0"/>
+                            <field name="gp_bachnumb" readonly="0"/>
                         </group>
                         <group string="GP Sales Info">
                             <field name="gp_slprsnid" readonly="1"/>

@@ -332,30 +332,34 @@ class StockPicking(models.Model):
 
         _logger.info(f"Grouping packages for picking {self.name}")
         _logger.info(f"Customer PO: {customer_po}")
-        _logger.info(f"Number of move lines: {len(self.move_line_ids)}")
 
-        for ml in self.move_line_ids:
-            if ml.result_package_id:
-                package = ml.result_package_id
-                _logger.info(f"Found package: {package.name}")
-                _logger.info(f"Package type: {package.package_type_id.name if package.package_type_id else 'NO TYPE'}")
-                _logger.info(f"Span package qty: {package.span_package_qty}")
-                _logger.info(f"Shipping weight: {package.shipping_weight}")
+        # Get unique packages (not move lines!)
+        packages = self.move_line_ids.mapped('result_package_id')
+        _logger.info(f"Number of unique packages: {len(packages)}")
 
-                pkg_type = package.package_type_id.name if package.package_type_id else 'PACKAGE'
+        for package in packages:
+            _logger.info(f"Found package: {package.name}")
+            _logger.info(f"Package type: {package.package_type_id.name if package.package_type_id else 'NO TYPE'}")
+            _logger.info(f"Span package qty: {package.span_package_qty}")
+            _logger.info(f"Shipping weight: {package.shipping_weight}")
 
-                if pkg_type not in packages_by_type:
-                    packages_by_type[pkg_type] = {
-                        'units': 0,
-                        'pkgs': 0,
-                        'weight': 0.0,
-                        'customer_po': customer_po,
-                        'picking_name': self.name
-                    }
+            pkg_type = package.package_type_id.name if package.package_type_id else 'PACKAGE'
 
-                packages_by_type[pkg_type]['units'] += 1
-                packages_by_type[pkg_type]['pkgs'] += package.span_package_qty or 0
-                packages_by_type[pkg_type]['weight'] += package.shipping_weight or 0.0
+            if pkg_type not in packages_by_type:
+                packages_by_type[pkg_type] = {
+                    'units': 0,  # Count of packages
+                    'pkgs': 0,  # Sum of span_package_qty
+                    'weight': 0.0,  # Sum of shipping_weight
+                    'customer_po': customer_po,
+                    'picking_name': self.name
+                }
+
+            # Each package counts as 1 unit
+            packages_by_type[pkg_type]['units'] += 1
+            # Add the span_package_qty from this package
+            packages_by_type[pkg_type]['pkgs'] += package.span_package_qty or 0
+            # Add the shipping_weight from this package
+            packages_by_type[pkg_type]['weight'] += package.shipping_weight or 0.0
 
         _logger.info(f"Grouped packages result: {packages_by_type}")
         return packages_by_type

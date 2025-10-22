@@ -218,7 +218,7 @@ class SaleOrder(models.Model):
 
         # Store GP fulfillment info on moves for reference
         if gp_data.get('has_fulfillment'):
-            self._update_pick_quantities(pick_operation, line_data)
+            self._process_pick_fulfillment(pick_operation, gp_data, line_data)
 
         _logger.info(f'Configured Pick operation {pick_operation.name} for order {self.name}')
 

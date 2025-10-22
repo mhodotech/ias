@@ -167,7 +167,7 @@ class GPProductSync(models.Model):
             'tracking': tracking,  # 'none', 'lot', 'serial'
             'sale_ok': True,
             'purchase_ok': True,
-            'standard_price': product_data.get('STNDCOST', 0),
+            'standard_price': float(product_data.get('STNDCOST', 0) or 0),
             'list_price': product_data.get('CURRCOST', 0),
         }
 
@@ -206,7 +206,7 @@ class GPProductSync(models.Model):
             'gp_itemdesc': product_data.get('ITEMDESC', '').strip(),
             'gp_itmclscd': product_data.get('ITMCLSCD', '').strip(),
             'tracking': tracking,
-            'standard_price': product_data.get('STNDCOST', 0),
+            'standard_price': float(product_data.get('STNDCOST', 0) or 0),
         }
 
         # Update weight if changed
@@ -254,7 +254,7 @@ class GPProductSync(models.Model):
 
         # Create stock quant for non-tracked items
         if product.tracking == 'none':
-            qty_on_hand = product_data.get('QTYONHND', 0)
+            qty_on_hand = float(product_data.get('QTYONHND', 0) or 0)
             if qty_on_hand > 0:
                 self.env['stock.quant'].create({
                     'product_id': product.id,

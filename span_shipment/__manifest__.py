@@ -72,6 +72,8 @@
         'reports/container_label_templates.xml',
         'reports/bill_of_lading_report.xml',
         'reports/bill_of_lading_templates.xml',
+        'reports/packing_list_report.xml',
+        'reports/packing_list_templates.xml',
 
         # Views - Order matters!
         'views/product_template_views.xml',

@@ -31,6 +31,12 @@
                         class="btn-secondary"
                 />
 
+                <button name="%(span_shipment.action_report_packing_list_picking)d"
+                string="Print Packing List"
+                type="action"
+                class="btn-secondary"
+                />
+
             </xpath>
 
             <!-- Add smart button -->

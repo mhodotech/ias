@@ -291,6 +291,35 @@ export class SpanShipmentOpeningScreen extends Component {
         });
     }
 
+    async printPackingList() {
+        if (!this.state.selectedPickingId && !this.state.selectedBatchId) {
+            this.notification.add("Please search and select an order or batch first", {
+                type: "warning",
+                title: "No Selection",
+            });
+            return;
+        }
+
+        const reportName = this.state.selectedBatchId
+            ? "span_shipment.report_packing_list_batch"
+            : "span_shipment.report_packing_list_picking";
+
+        const recordId = this.state.selectedBatchId || this.state.selectedPickingId;
+        const modelName = this.state.selectedBatchId ? "stock.picking.batch" : "stock.picking";
+
+        await this.action.doAction({
+            type: "ir.actions.report",
+            report_name: reportName,
+            report_type: "qweb-pdf",
+            data: null,
+            context: {
+                active_ids: [recordId],
+                active_model: modelName,
+            },
+        });
+    }
+
+
     async closeCarriers() {
         // Open delivery orders list filtered for carrier closing
         await this.action.doAction({

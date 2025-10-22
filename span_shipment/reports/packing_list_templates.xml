@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Template for Single Picking -->
+    <template id="report_packing_list_picking">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="span_shipment.report_packing_list_document">
+                    <t t-set="o" t-value="doc"/>
+                    <t t-set="is_batch" t-value="False"/>
+                    <t t-set="picking_orders" t-value="[doc]"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Template for Batch -->
+    <template id="report_packing_list_batch">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="span_shipment.report_packing_list_document">
+                    <t t-set="o" t-value="doc"/>
+                    <t t-set="is_batch" t-value="True"/>
+                    <t t-set="picking_orders" t-value="doc.picking_ids"/>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Main Document Template -->
+    <template id="report_packing_list_document">
+        <div class="page" style="font-family: Arial, sans-serif; font-size: 10pt;">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Packing List</h2>
+            </div>
+
+            <!-- Get company info from warehouse -->
+            <t t-if="is_batch">
+                <t t-set="warehouse" t-value="o.picking_ids[0].picking_type_id.warehouse_id if o.picking_ids else False"/>
+                <t t-set="document_name" t-value="o.name"/>
+                <t t-set="scheduled_date" t-value="o.scheduled_date"/>
+                <t t-set="shipment_number" t-value="o.shipment_number"/>
+<!--                <t t-set="carrier" t-value="o.carrier_id or (o.picking_ids[0].carrier_id if o.picking_ids else False)"/>-->
+            </t>
+            <t t-else="">
+                <t t-set="warehouse" t-value="o.picking_type_id.warehouse_id"/>
+                <t t-set="document_name" t-value="o.name"/>
+                <t t-set="scheduled_date" t-value="o.scheduled_date"/>
+                <t t-set="shipment_number" t-value="o.shipment_number"/>
+<!--                <t t-set="carrier" t-value="o.carrier_id"/>-->
+            </t>
+
+            <table style="width: 100%; margin-bottom: 20px;">
+                <tr>
+                    <td style="width: 48%; vertical-align: top;">
+                        <!-- Company Info -->
+                        <div style="font-size: 13pt;">
+                            <t t-if="warehouse and warehouse.partner_id">
+                                <b><t t-out="warehouse.partner_id.name"/></b><br/>
+                                <t t-out="warehouse.partner_id.street"/><br/>
+                                <t t-if="warehouse.partner_id.street2">
+                                    <t t-out="warehouse.partner_id.street2"/><br/>
+                                </t>
+                                <t t-out="warehouse.partner_id.city"/>, <t t-out="warehouse.partner_id.state_id.code"/> <t t-out="warehouse.partner_id.zip"/>
+                            </t>
+                            <t t-else="">
+                                <b><t t-out="o.company_id.name"/></b><br/>
+                                <t t-out="o.company_id.street"/><br/>
+                                <t t-if="o.company_id.street2">
+                                    <t t-out="o.company_id.street2"/><br/>
+                                </t>
+                                <t t-out="o.company_id.city"/>, <t t-out="o.company_id.state_id.code"/> <t t-out="o.company_id.zip"/>
+                            </t>
+                        </div>
+                    </td>
+                    <td style="width: 4%;"></td>
+                    <td style="width: 48%; vertical-align: top;">
+                        <!-- Document Info Table -->
+                        <table style="width: 100%; border: 1px solid black; border-collapse: collapse;">
+                            <tr>
+                                <td style="border: 1px solid black; padding: 5px; background-color: #e0e0e0; width: 40%;"><b>Document #:</b></td>
+                                <td style="border: 1px solid black; padding: 5px;"><t t-out="document_name"/></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 5px; background-color: #e0e0e0;"><b>Shipment Date</b></td>
+                                <td style="border: 1px solid black; padding: 5px;"><t t-out="scheduled_date.strftime('%m/%d/%Y') if scheduled_date else ''"/></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 5px; background-color: #e0e0e0;"><b>Shipment #:</b></td>
+                                <td style="border: 1px solid black; padding: 5px;"><t t-out="shipment_number or ''"/></td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 5px; background-color: #e0e0e0;"><b>Shipping Method</b></td>
+                                <td style="border: 1px solid black; padding: 5px;">
+                                    <t t-if="is_batch">
+                                        <t t-if="o.carrier_id">
+                                            <t t-out="o.carrier_id.name[:3].upper()"/>
+                                        </t>
+                                        <t t-else="">TBB</t>
+                                    </t>
+                                    <t t-else="">
+                                        <!-- For single picking -->
+                                        <t t-if="o.carrier_id">
+                                            <t t-out="o.carrier_id.name[:3].upper()"/>
+                                        </t>
+                                        <t t-else="">TBB</t>
+                                    </t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 5px; background-color: #e0e0e0;"><b>Created By</b></td>
+                                <td style="border: 1px solid black; padding: 5px;"><t t-out="o.create_uid.name"/></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Ship To / Bill To Section -->
+            <table style="width: 100%; margin-bottom: 20px;">
+                <tr>
+                    <td style="width: 48%; vertical-align: top;">
+                        <table style="width: 100%; border: 1px solid black; border-collapse: collapse;">
+                            <tr>
+                                <td style="border: 1px solid black; padding: 10px; background-color: #e0e0e0;">
+                                    <b>Ship To</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 10px;">
+                                    <t t-if="picking_orders">
+                                        <t t-set="partner" t-value="picking_orders[0].partner_id"/>
+                                        <t t-out="partner.name"/><br/>
+                                        <t t-out="partner.street"/><br/>
+                                        <t t-if="partner.city"><t t-out="partner.city"/>, </t>
+                                        <t t-if="partner.state_id"><t t-out="partner.state_id.code"/> </t>
+                                        <t t-out="partner.zip"/>
+                                    </t>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="width: 4%;"></td>
+                    <td style="width: 48%; vertical-align: top;">
+                        <table style="width: 100%; border: 1px solid black; border-collapse: collapse;">
+                            <tr>
+                                <td style="border: 1px solid black; padding: 10px; background-color: #e0e0e0;">
+                                    <b>Bill To</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid black; padding: 10px;">
+                                    <t t-if="picking_orders and picking_orders[0].sale_id">
+                                        <t t-set="invoice_partner" t-value="picking_orders[0].sale_id.partner_invoice_id"/>
+                                        <t t-out="invoice_partner.name"/><br/>
+                                        <t t-out="invoice_partner.street"/><br/>
+                                        <t t-if="invoice_partner.street2"><t t-out="invoice_partner.street2"/><br/></t>
+                                        <t t-if="invoice_partner.city"><t t-out="invoice_partner.city"/>, </t>
+                                        <t t-if="invoice_partner.state_id"><t t-out="invoice_partner.state_id.code"/> </t>
+                                        <t t-out="invoice_partner.zip"/><br/>
+                                        <br/>
+                                        ATTN:
+                                    </t>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Main Data Table -->
+            <t t-foreach="picking_orders" t-as="picking">
+                <table style="width: 100%; border: 1px solid black; border-collapse: collapse; margin-bottom: 10px;">
+                    <thead>
+                        <tr style="background-color: #e0e0e0;">
+                            <th style="border: 1px solid black; padding: 5px;">Purchase Order No.</th>
+                            <th style="border: 1px solid black; padding: 5px;">Document No.</th>
+                            <th style="border: 1px solid black; padding: 5px;">Customer ID</th>
+                            <th style="border: 1px solid black; padding: 5px;">Carrier</th>
+                            <th style="border: 1px solid black; padding: 5px;">Carrier Service</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 1px solid black; padding: 5px;">
+                                <t t-out="picking.sale_id.gp_cstponbr  or ''"/>
+                            </td>
+                            <td style="border: 1px solid black; padding: 5px;"></td>
+                            <td style="border: 1px solid black; padding: 5px;">
+                                <t t-out="picking.sale_id.gp_custnmbr  or ''"/>
+                            </td>
+                            <td style="border: 1px solid black; padding: 5px;">
+                                <t t-if="is_batch and o.carrier_id">
+                                    <t t-out="o.carrier_id.name"/>
+                                </t>
+                                <t t-elif="picking.carrier_id">
+                                    <t t-out="picking.carrier_id.name"/>
+                                </t>
+                                <t t-else=""></t>
+                            </td>
+                            <td style="border: 1px solid black; padding: 5px;">
+                                <t t-set="services" t-value="[]"/>
+                                <t t-if="picking.requires_liftgate">
+                                    <t t-set="services" t-value="services + ['Liftgate Required']"/>
+                                </t>
+                                <t t-if="picking.requires_inside_delivery">
+                                    <t t-set="services" t-value="services + ['Inside Delivery']"/>
+                                </t>
+                                <t t-out="' / '.join(services)"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Items Table -->
+                <table style="width: 100%; border: 1px solid black; border-collapse: collapse; margin-bottom: 20px;">
+                    <thead>
+                        <tr style="background-color: #e0e0e0;">
+                            <th style="border: 1px solid black; padding: 5px;">Ordered</th>
+                            <th style="border: 1px solid black; padding: 5px;">Shipped</th>
+                            <th style="border: 1px solid black; padding: 5px;">Item Number</th>
+                            <th style="border: 1px solid black; padding: 5px;">Description</th>
+                            <th style="border: 1px solid black; padding: 5px;">Tracking Number(s)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="picking.move_line_ids_without_package" t-as="line">
+                            <tr>
+                                <td style="border: 1px solid black; padding: 5px; text-align: center;">
+                                    <t t-out="'%.2f' % line.quantity"/>
+                                </td>
+                                <td style="border: 1px solid black; padding: 5px; text-align: center;">
+                                    <t t-out="'%.2f' % line.quantity"/>
+                                </td>
+                                <td style="border: 1px solid black; padding: 5px;">
+                                    <t t-out="line.product_id.default_code or ''"/>
+                                </td>
+                                <td style="border: 1px solid black; padding: 5px;">
+                                    <t t-out="line.product_id.name"/>
+                                    <t t-if="line.lot_id">
+                                        <br/>S/N: <t t-out="line.lot_id.name"/>
+                                    </t>
+                                </td>
+                                <td style="border: 1px solid black; padding: 5px;">
+                                    <t t-if="is_batch and o.carrier_tracking_ref">
+                                        <t t-out="o.carrier_tracking_ref"/>
+                                    </t>
+                                    <t t-elif="picking.carrier_tracking_ref">
+                                        <t t-out="picking.carrier_tracking_ref"/>
+                                    </t>
+                                    <t t-else=""></t>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </t>
+        </div>
+    </template>
+</odoo>

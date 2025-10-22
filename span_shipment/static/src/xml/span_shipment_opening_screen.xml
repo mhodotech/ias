@@ -141,8 +141,11 @@
                                 <button class="btn btn-primary quick-action-btn" t-on-click="printBillOfLading">
                                     <i class="fa fa-file-text"/> Bill of Lading
                                 </button>
+                                <button class="btn btn-primary quick-action-btn" t-on-click="printPackingList">
+                                    <i class="fa fa-list-alt"/> Packing List
+                                </button>
                                 <button class="btn btn-info quick-action-btn" t-on-click="printReports">
-                                    <i class="fa fa-file-alt"/> All Reports
+                                    <i class="fa fa-file-alt"/> Open Operation
                                 </button>
                             </div>
                         </div>

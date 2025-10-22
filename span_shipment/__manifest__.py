@@ -68,6 +68,7 @@
         'data/paperformat.xml',
 
         # Reports
+        'reports/report_layouts.xml',
         'reports/container_label_report.xml',
         'reports/container_label_templates.xml',
         'reports/bill_of_lading_report.xml',

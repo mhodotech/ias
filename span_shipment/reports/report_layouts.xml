@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Shared layout for reports without header space -->
+    <template id="report_no_header_layout">&lt;!DOCTYPE html&gt;
+        <html t-att-data-report-margin-top="0"
+              t-att-data-report-header-spacing="0"
+              t-att-data-report-dpi="data_report_dpi"
+              t-att-data-report-landscape="data_report_landscape">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="initial-scale=1"/>
+                <title><t t-esc="title or 'Report'"/></title>
+                <t t-call-assets="web.report_assets_common"/>
+                <style>
+                    /* Force removal of all margins */
+                    @page {
+                        size: auto;
+                        margin: 0mm !important;
+                        margin-top: 0mm !important;
+                        margin-header: 0mm !important;
+                        padding: 0mm !important;
+                    }
+
+                    @media print {
+                        body {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                    }
+
+                    body {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+
+                    /* Hide any headers */
+                    .header,
+                    .o_report_header,
+                    .top_header,
+                    .oe_structure {
+                        display: none !important;
+                        height: 0 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+
+                    #wrapwrap {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+
+                    main {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+
+                    .article {
+                        margin-top: 0 !important;
+                        padding-top: 0 !important;
+                    }
+
+                    .page {
+                        margin-top: 0 !important;
+                        padding-top: 5px !important;
+                        padding-left: 10px !important;
+                        padding-right: 10px !important;
+                    }
+
+                    .page > *:first-child {
+                        margin-top: 0 !important;
+                    }
+
+                    /* Override Bootstrap container margins */
+                    .container-fluid {
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+                </style>
+            </head>
+            <body class="o_body_html container-fluid" style="margin: 0; padding: 0;">
+                <div id="wrapwrap" style="margin: 0; padding: 0;">
+                    <main style="margin: 0; padding: 0;">
+                        <t t-out="0"/>
+                    </main>
+                </div>
+            </body>
+        </html>
+    </template>
+</odoo>

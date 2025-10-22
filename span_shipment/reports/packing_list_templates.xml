@@ -2,7 +2,7 @@
 <odoo>
     <!-- Template for Single Picking -->
     <template id="report_packing_list_picking">
-        <t t-call="web.html_container">
+        <t t-call="span_shipment.report_no_header_layout">
             <t t-foreach="docs" t-as="doc">
                 <t t-call="span_shipment.report_packing_list_document">
                     <t t-set="o" t-value="doc"/>
@@ -15,7 +15,7 @@
 
     <!-- Template for Batch -->
     <template id="report_packing_list_batch">
-        <t t-call="web.html_container">
+        <t t-call="span_shipment.report_no_header_layout">
             <t t-foreach="docs" t-as="doc">
                 <t t-call="span_shipment.report_packing_list_document">
                     <t t-set="o" t-value="doc"/>

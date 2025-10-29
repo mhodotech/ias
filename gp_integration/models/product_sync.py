@@ -252,32 +252,120 @@ class GPProductSync(models.Model):
         if not location:
             return
 
-        # Create stock quant for non-tracked items
+        qty_on_hand = float(product_data.get('QTYONHND', 0) or 0)
+
         if product.tracking == 'none':
-            qty_on_hand = float(product_data.get('QTYONHND', 0) or 0)
+            # For non-tracked items, create the full quantity
             if qty_on_hand > 0:
                 self.env['stock.quant'].create({
                     'product_id': product.id,
                     'location_id': location.id,
                     'quantity': qty_on_hand,
                 })
+        else:
+            # For tracked items, import untracked quantity without serial/lot
+            # First check how much is already tracked
+            tracked_qty = 0
+
+            if product.tracking == 'serial':
+                # Count serials
+                query = "SELECT COUNT(*) as count FROM IV00200 WHERE ITEMNMBR = ? AND SERLNSLD = 0"
+                cursor.execute(query, product.gp_itemnmbr)
+                result = cursor.fetchone()
+                tracked_qty = result.count if result else 0
+
+            elif product.tracking == 'lot':
+                # Sum lot quantities
+                query = "SELECT SUM(QTYRECVD - QTYSOLD) as qty FROM IV00300 WHERE ITEMNMBR = ? AND (QTYRECVD - QTYSOLD) > 0"
+                cursor.execute(query, product.gp_itemnmbr)
+                result = cursor.fetchone()
+                tracked_qty = float(result.qty) if result and result.qty else 0
+
+            # Create quant for untracked quantity
+            untracked_qty = qty_on_hand - tracked_qty
+            if untracked_qty > 0:
+                _logger.warning(
+                    f'Product {product.gp_itemnmbr} has {untracked_qty} units '
+                    f'without {product.tracking} tracking. Creating untracked stock.'
+                )
+                self.env['stock.quant'].create({
+                    'product_id': product.id,
+                    'location_id': location.id,
+                    'quantity': untracked_qty,
+                    # No lot_id - this is untracked inventory
+                })
 
     def _update_stock_quantities(self, product, product_data, cursor, config):
         """Update stock quantities for existing product"""
-        # For now, we'll just log the difference
-        # In production, you might want to create inventory adjustments
+        location = config.default_location_id or self.env['stock.location'].search([
+            ('usage', '=', 'internal'),
+            ('company_id', '=', self.env.company.id)
+        ], limit=1)
 
-        current_qty = self.env['stock.quant'].search([
+        if not location:
+            return
+
+        # Get current quantities in Odoo
+        current_quants = self.env['stock.quant'].search([
             ('product_id', '=', product.id),
-            ('location_id.usage', '=', 'internal')
-        ]).mapped('quantity')
+            ('location_id', '=', location.id)
+        ])
 
-        current_total = sum(current_qty)
-        gp_total = product_data.get('QTYONHND', 0)
+        # Calculate what should be in Odoo
+        gp_total = float(product_data.get('QTYONHND', 0) or 0)
 
-        if abs(current_total - gp_total) > 0.01:
-            _logger.info(f'Quantity mismatch for {product.default_code}: Odoo={current_total}, GP={gp_total}')
-            # You can create an inventory adjustment here if needed
+        if product.tracking == 'none':
+            # For non-tracked products, just update the quantity
+            if current_quants:
+                if abs(sum(current_quants.mapped('quantity')) - gp_total) > 0.01:
+                    # Update the first quant and remove others if multiple exist
+                    current_quants[0].quantity = gp_total
+                    if len(current_quants) > 1:
+                        current_quants[1:].unlink()
+            elif gp_total > 0:
+                self.env['stock.quant'].create({
+                    'product_id': product.id,
+                    'location_id': location.id,
+                    'quantity': gp_total,
+                })
+        else:
+            # Your existing code for tracked products
+            tracked_qty = 0
+
+            if product.tracking == 'serial':
+                query = "SELECT COUNT(*) as count FROM IV00200 WHERE ITEMNMBR = ? AND SERLNSLD = 0"
+                cursor.execute(query, product.gp_itemnmbr)
+                result = cursor.fetchone()
+                tracked_qty = result.count if result else 0
+            elif product.tracking == 'lot':
+                query = "SELECT SUM(QTYRECVD - QTYSOLD) as qty FROM IV00300 WHERE ITEMNMBR = ? AND (QTYRECVD - QTYSOLD) > 0"
+                cursor.execute(query, product.gp_itemnmbr)
+                result = cursor.fetchone()
+                tracked_qty = float(result.qty) if result and result.qty else 0
+
+            untracked_qty = gp_total - tracked_qty
+
+            # Find untracked quant (quant without lot_id for tracked products)
+            untracked_quant = current_quants.filtered(lambda q: not q.lot_id)
+
+            if untracked_qty > 0:
+                if untracked_quant:
+                    # Update existing untracked quant
+                    if abs(untracked_quant[0].quantity - untracked_qty) > 0.01:
+                        _logger.warning(f'Updating untracked quantity for {product.gp_itemnmbr}: {untracked_qty}')
+                        untracked_quant[0].quantity = untracked_qty
+                else:
+                    # Create new untracked quant
+                    _logger.warning(f'Creating untracked quantity for {product.gp_itemnmbr}: {untracked_qty}')
+                    self.env['stock.quant'].create({
+                        'product_id': product.id,
+                        'location_id': location.id,
+                        'quantity': untracked_qty,
+                    })
+            elif untracked_quant:
+                # Remove untracked quant if no longer needed
+                _logger.info(f'Removing untracked quantity for {product.gp_itemnmbr}')
+                untracked_quant.unlink()
 
     def _import_tracking_info(self, product, cursor, config):
         """Import lot or serial numbers for a product"""

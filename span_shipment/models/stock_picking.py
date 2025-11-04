@@ -292,6 +292,61 @@ class StockPicking(models.Model):
 
         return res
 
+    def _propagate_packages_backward(self):
+        """Propagate packages backward to previous transfers in the chain"""
+        for picking in self:
+            # Get all packages from current picking
+            current_packages = picking.move_line_ids.mapped('result_package_id')
+            if not current_packages:
+                continue
+
+            # Find previous pickings in the chain
+            previous_pickings = self.env['stock.picking']
+
+            # Method 1: Through move origins (backward through the chain)
+            for move in picking.move_ids:
+                if move.move_orig_ids:
+                    previous_pickings |= move.move_orig_ids.mapped('picking_id')
+
+            # Method 2: Through sale order (all pickings for same sale)
+            if picking.sale_id:
+                all_sale_pickings = self.env['stock.picking'].search([
+                    ('sale_id', '=', picking.sale_id.id),
+                    ('id', '!=', picking.id)
+                ])
+                # Filter to only previous pickings (those that come before in the workflow)
+                for sale_picking in all_sale_pickings:
+                    # Check if this picking has moves that lead to our current picking
+                    for sale_move in sale_picking.move_ids:
+                        if sale_move.move_dest_ids and picking in sale_move.move_dest_ids.mapped('picking_id'):
+                            previous_pickings |= sale_picking
+                            break
+
+            # Update previous pickings with packages
+            for prev_picking in previous_pickings:
+                # Find corresponding move lines in previous picking
+                for package in current_packages:
+                    # Get the products in this package
+                    package_move_lines = picking.move_line_ids.filtered(
+                        lambda ml: ml.result_package_id == package
+                    )
+
+                    # Find matching move lines in previous picking (same products)
+                    for package_ml in package_move_lines:
+                        matching_prev_lines = prev_picking.move_line_ids.filtered(
+                            lambda ml: ml.product_id == package_ml.product_id and
+                                     ml.lot_id == package_ml.lot_id and
+                                     not ml.result_package_id  # Only update lines without packages
+                        )
+
+                        # Link the package to matching lines in previous picking
+                        if matching_prev_lines:
+                            matching_prev_lines.write({
+                                'result_package_id': package.id
+                            })
+
+            _logger.info(f"Propagated packages from {picking.name} to previous pickings: {previous_pickings.mapped('name')}")
+
     def write(self, vals):
         """Override write to propagate shipping changes"""
         res = super().write(vals)

@@ -292,6 +292,14 @@ class PutInPackWizard(models.TransientModel):
             'picked': False,  # Reset picked flag after packing
         })
 
+        # Propagate package backward to previous transfers in the chain
+        if self.picking_id:
+            self.picking_id._propagate_packages_backward()
+        elif self.batch_id and self.move_line_ids:
+            # For batch pickings, propagate for each picking
+            pickings = self.move_line_ids.mapped('picking_id')
+            pickings._propagate_packages_backward()
+
         # Success message and close wizard
         return {
             'type': 'ir.actions.client',
